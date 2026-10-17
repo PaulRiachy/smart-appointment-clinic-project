@@ -1,0 +1,43 @@
+{
+  "name": "smart-appointment-clinic-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-Stack TypeScript MERN Smart Appointment & Queue System",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PaulRiachy/smart-appointment-clinic-project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PaulRiachy/smart-appointment-clinic-project/issues"
+  },
+  "homepage": "https://github.com/PaulRiachy/smart-appointment-clinic-project#readme",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build:shared": "npm run build --workspace=shared",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend"
+  },
+  "keywords": [
+    "mern",
+    "typescript",
+    "appointment-system",
+    "queue-management",
+    "socket-io"
+  ],
+  "author": "Paul Riachy",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.4"
+  }
+}

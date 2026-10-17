@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build & Compilation Outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment Secrets
+.env
+.env.local
+.env.production
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System Logs & OS Junk
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db

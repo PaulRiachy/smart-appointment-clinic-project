@@ -121,7 +121,6 @@ export async function register(
       return;
     }
 
-    // Never accept a public role assignment from req.body.
     const user = await User.create({
       fullName: normalizedName,
       email: normalizedEmail,

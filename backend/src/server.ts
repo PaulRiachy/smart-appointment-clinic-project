@@ -3,24 +3,27 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-
+import cors from 'cors';
 import express, {
   type ErrorRequestHandler,
   type Request,
   type Response,
 } from 'express';
-import cors from 'cors';
 import { createServer } from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
 
 import { connectDB } from './config/db';
 import authRoutes from './routes/auth.routes';
+import serviceRoutes from './routes/service.routes';
+import scheduleRoutes from './routes/schedule.routes';
+import userRoutes from './routes/user.routes';
 
 const app = express();
 const httpServer = createServer(app);
 
 const port = Number(process.env.PORT || 5000);
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const clientUrl =
+  process.env.CLIENT_URL || 'http://localhost:5173';
 
 const io = new SocketIOServer(httpServer, {
   cors: {
@@ -29,7 +32,6 @@ const io = new SocketIOServer(httpServer, {
   },
 });
 
-// Middleware
 app.use(
   cors({
     origin: clientUrl,
@@ -37,42 +39,55 @@ app.use(
   }),
 );
 
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(
+  express.json({
+    limit: '1mb',
+  }),
+);
 
-// Make Socket.IO available 
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: '1mb',
+  }),
+);
+
 app.set('io', io);
 
-// Health check
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    message: 'API server is running.',
-    data: {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-    },
-  });
-});
+app.get(
+  '/api/health',
+  (_req: Request, res: Response): void => {
+    res.status(200).json({
+      success: true,
+      message: 'API server is running.',
+      data: {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+      },
+    });
+  },
+);
 
-// Authentication endpoints
 app.use('/api/auth', authRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/staff', scheduleRoutes);
 
-// Handle unknown endpoints
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: 'API endpoint not found.',
-  });
-});
+app.use(
+  (_req: Request, res: Response): void => {
+    res.status(404).json({
+      success: false,
+      message: 'API endpoint not found.',
+    });
+  },
+);
 
-// Centralized error handler
 const errorHandler: ErrorRequestHandler = (
   error,
   _req,
   res,
   _next,
-) => {
+): void => {
   console.error('Unhandled server error:', error);
 
   if (res.headersSent) {
@@ -87,18 +102,20 @@ const errorHandler: ErrorRequestHandler = (
 
 app.use(errorHandler);
 
-// Connect to MongoDB
 async function startServer(): Promise<void> {
   try {
     await connectDB();
 
     httpServer.listen(port, () => {
-      console.log(`API server listening on port ${port}`);
-      console.log(`Health check: http://localhost:${port}/api/health`);
-      console.log(`Auth API: http://localhost:${port}/api/auth`);
+      console.log(
+        `API server listening on http://localhost:${port}`,
+      );
+      console.log(
+        `Client CORS origin: ${clientUrl}`,
+      );
     });
   } catch (error) {
-    console.error('Failed to start the API server:', error);
+    console.error('Failed to start server:', error);
     process.exitCode = 1;
   }
 }
@@ -109,7 +126,10 @@ async function shutdown(): Promise<void> {
   io.close();
 
   if (httpServer.listening) {
-    httpServer.close();
+    httpServer.close(() => {
+      process.exit(0);
+    });
+    return;
   }
 
   process.exit(0);

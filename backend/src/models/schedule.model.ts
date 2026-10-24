@@ -68,7 +68,6 @@ const scheduleSchema = new Schema<ScheduleRecord>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      unique: true,
     },
     weeklyIntervals: {
       type: weeklyIntervalsSchema,
@@ -99,5 +98,4 @@ const scheduleSchema = new Schema<ScheduleRecord>(
 
 scheduleSchema.index({ staff: 1 }, { unique: true });
 
-export const StaffSchedule: Model<ScheduleRecord> =
-  model<ScheduleRecord>('StaffSchedule', scheduleSchema);
+export const StaffSchedule: Model<ScheduleRecord> = model<ScheduleRecord>('StaffSchedule', scheduleSchema);

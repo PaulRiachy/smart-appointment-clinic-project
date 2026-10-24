@@ -17,6 +17,8 @@ import authRoutes from './routes/auth.routes';
 import serviceRoutes from './routes/service.routes';
 import scheduleRoutes from './routes/schedule.routes';
 import userRoutes from './routes/user.routes';
+import appointmentRoutes from './routes/appointment.routes';
+import { ensureBookingLockIndexes } from './services/availability.service';
 
 const app = express();
 const httpServer = createServer(app);
@@ -72,6 +74,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/staff', scheduleRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 app.use(
   (_req: Request, res: Response): void => {
@@ -105,6 +108,7 @@ app.use(errorHandler);
 async function startServer(): Promise<void> {
   try {
     await connectDB();
+    await ensureBookingLockIndexes();
 
     httpServer.listen(port, () => {
       console.log(

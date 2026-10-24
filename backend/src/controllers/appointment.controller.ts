@@ -749,11 +749,7 @@ export async function confirmAppointment(
       appointmentStart,
       appointmentEnd,
       async () => {
-        /*
-         * Recalculate availability while holding
-         * the booking lock. The current appointment is
-         * excluded from the overlap check.
-         */
+        // Recalculate availability while holding the booking lock.
         await validateSlot(
           serviceId,
           staffId,

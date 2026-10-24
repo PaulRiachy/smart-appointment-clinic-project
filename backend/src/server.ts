@@ -19,6 +19,8 @@ import scheduleRoutes from './routes/schedule.routes';
 import userRoutes from './routes/user.routes';
 import appointmentRoutes from './routes/appointment.routes';
 import { ensureBookingLockIndexes } from './services/availability.service';
+import { initQueueSocket } from './sockets/queue.socket';
+import { queueRouter } from './routes/queue.routes';
 
 const app = express();
 const httpServer = createServer(app);
@@ -75,6 +77,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/staff', scheduleRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/queue', queueRouter);
 
 app.use(
   (_req: Request, res: Response): void => {
@@ -109,14 +112,12 @@ async function startServer(): Promise<void> {
   try {
     await connectDB();
     await ensureBookingLockIndexes();
+    initQueueSocket(io);
 
     httpServer.listen(port, () => {
-      console.log(
-        `API server listening on http://localhost:${port}`,
-      );
-      console.log(
-        `Client CORS origin: ${clientUrl}`,
-      );
+      console.log(`API server running on http://localhost:${port}`);
+      console.log(`Socket.IO server running on http://localhost:${port}`);
+      console.log(`Client origin: ${clientUrl}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

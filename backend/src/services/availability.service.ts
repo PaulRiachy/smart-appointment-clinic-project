@@ -762,11 +762,8 @@ export async function validateAndRunWithStaffLock<T>(
     );
   }
 
-  /*
-   * Remove expired locks first. The TTL index is useful as
-   * background cleanup, but we must not depend on its timing
-   * for booking correctness.
-   */
+  // Remove expired locks first. 
+
   await collection.deleteMany({
     lockUntil: {
       $lte: now,
@@ -793,10 +790,7 @@ export async function validateAndRunWithStaffLock<T>(
       },
     );
   } catch (error: any) {
-    /*
-     * A duplicate _id means another request already owns
-     * at least one of these 15-minute booking slices.
-     */
+    // A duplicate _id means another request already owns at least one of these 15-minute booking slices.
     if (error?.code === 11000) {
       throw new Error(
         'The selected appointment time is currently being booked by another request. Please choose another time.',

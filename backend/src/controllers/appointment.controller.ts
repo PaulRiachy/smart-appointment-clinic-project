@@ -14,6 +14,11 @@ import { Appointment } from '../models/appointment.model';
 import { Service } from '../models/service.model';
 import { User }from '../models/user.model';
 import {
+  sendBookingConfirmationEmail,
+  sendRescheduleEmail,
+  sendCancellationEmail,
+} from '../services/mail.service';
+import {
   getAvailability,
   validateSlot,
   validateAndRunWithStaffLock,
@@ -228,6 +233,46 @@ async function findAppointmentOrThrow(
   }
 
   return appointment;
+}
+
+async function getAppointmentEmailDetails(appointmentId: string) {
+  const appointment = await Appointment.findById(appointmentId)
+    .populate('customer', 'fullName email')
+    .populate('service', 'name')
+    .populate('staff', 'fullName')
+    .lean();
+
+  if (!appointment) {
+    throw new HttpError(404, 'Appointment not found.');
+  }
+
+  const customer = appointment.customer as {
+    fullName?: string;
+    email?: string;
+  } | null;
+  const service = appointment.service as {
+    name?: string;
+  } | null;
+  const staff = appointment.staff as {
+    fullName?: string;
+  } | null;
+
+  if (!customer?.email) {
+    console.error(
+      `Cannot send appointment email: customer email is missing for ${appointment.reference}.`,
+    );
+    return null;
+  }
+
+  return {
+    to: customer.email,
+    customerName: customer.fullName || 'Customer',
+    reference: appointment.reference,
+    serviceName: service?.name || 'Appointment',
+    staffName: staff?.fullName || 'Staff member',
+    start: new Date(appointment.start),
+    end: new Date(appointment.end),
+  };
 }
 
 export async function getAvailabilityController(
@@ -549,6 +594,13 @@ export async function cancelAppointment(
 
     await appointment.save();
 
+    const emailDetails =
+      await getAppointmentEmailDetails(String(appointment._id));
+
+    if (emailDetails) {
+      await sendCancellationEmail(emailDetails);
+    }
+
     res.status(200).json({
       success: true,
       message: 'Appointment cancelled successfully.',
@@ -673,6 +725,13 @@ export async function rescheduleAppointment(
         },
       );
 
+    const emailDetails =
+      await getAppointmentEmailDetails(String(updated._id));
+
+    if (emailDetails) {
+      await sendRescheduleEmail(emailDetails);
+    }
+
     res.status(200).json({
       success: true,
       message:
@@ -763,6 +822,13 @@ export async function confirmAppointment(
         await appointment.save();
       },
     );
+
+    const emailDetails =
+      await getAppointmentEmailDetails(String(appointment._id));
+
+    if (emailDetails) {
+      await sendBookingConfirmationEmail(emailDetails);
+    }
 
     res.status(200).json({
       success: true,

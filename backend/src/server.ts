@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
+
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 import cors from 'cors';
@@ -21,6 +22,8 @@ import appointmentRoutes from './routes/appointment.routes';
 import { ensureBookingLockIndexes } from './services/availability.service';
 import { initQueueSocket } from './sockets/queue.socket';
 import { queueRouter } from './routes/queue.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import { startNoShowCron } from './jobs/noshow.cron';
 
 const app = express();
 const httpServer = createServer(app);
@@ -78,6 +81,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/staff', scheduleRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/queue', queueRouter);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use(
   (_req: Request, res: Response): void => {
@@ -112,6 +116,7 @@ async function startServer(): Promise<void> {
   try {
     await connectDB();
     await ensureBookingLockIndexes();
+    startNoShowCron();
     initQueueSocket(io);
 
     httpServer.listen(port, () => {

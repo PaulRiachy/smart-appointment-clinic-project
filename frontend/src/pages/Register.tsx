@@ -90,8 +90,6 @@ export default function Register() {
 
       let result = getAuthResult(registration.data);
 
-      // Some registration endpoints create the account but do not
-      // return a token. In that case, sign in with the new credentials.
       if (!result.token || !result.user) {
         const loginResponse = await api.post<AuthResponse>(
           '/auth/login',

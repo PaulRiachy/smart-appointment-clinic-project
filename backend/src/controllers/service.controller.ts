@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import mongoose from 'mongoose';
+import { UserRole } from '@app/shared';
 import { Service } from '../models/service.model';
+import type { AuthenticatedRequest } from '../middleware/auth.middleware';
+
 
 function isValidServicePayload(body: unknown): body is {
   name: string;
@@ -28,11 +31,16 @@ function isValidServicePayload(body: unknown): body is {
 }
 
 export async function listServices(
-  _req: Request,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {
-    const services = await Service.find({ active: true })
+    const authReq = req as AuthenticatedRequest;
+    const isAdmin = authReq.user?.role === UserRole.ADMIN;
+
+    const services = await Service.find(
+      isAdmin ? {} : { active: true },
+    )
       .sort({ name: 1 })
       .lean();
 

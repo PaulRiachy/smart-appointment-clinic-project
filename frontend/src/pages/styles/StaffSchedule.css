@@ -1,0 +1,468 @@
+/* StaffSchedule.css */
+
+.staff-schedule-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px;
+  color: #172033;
+}
+
+.staff-schedule-header {
+  margin-bottom: 28px;
+}
+
+.staff-schedule-eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.staff-schedule-header h1 {
+  margin: 4px 0 8px;
+  color: #111827;
+  font-size: 30px;
+  font-weight: 750;
+  letter-spacing: -0.8px;
+}
+
+.staff-schedule-description {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.staff-schedule-panel {
+  margin-bottom: 24px;
+  padding: 26px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 4%);
+}
+
+.staff-schedule-panel > h2,
+.staff-schedule-section-header h2,
+.staff-services-assignment h2 {
+  margin: 0 0 8px;
+  color: #172033;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.staff-schedule-panel > h2 {
+  margin-bottom: 22px;
+}
+
+.staff-schedule-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.staff-schedule-section-header p,
+.staff-services-assignment > p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.staff-create-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px 16px;
+}
+
+.staff-create-form > label:nth-child(3) {
+  grid-column: auto;
+}
+
+.staff-create-form > .staff-schedule-button {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  width: 33%;
+  min-height: 46px;
+  margin-top: 2px;
+  justify-self: center;
+}
+
+.staff-create-form > label,
+.staff-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.staff-create-form input,
+.staff-select select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: #172033;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.staff-create-form input::placeholder {
+  color: #94a3b8;
+}
+
+.staff-create-form input:focus,
+.staff-select select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 12%);
+}
+
+.staff-schedule-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 17px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.staff-schedule-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.staff-schedule-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.staff-schedule-button--primary {
+  color: #fff;
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.staff-schedule-button--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.staff-schedule-button--secondary {
+  color: #334155;
+  background: #fff;
+  border-color: #cbd5e1;
+}
+
+.staff-schedule-button--secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.staff-select {
+  max-width: 620px;
+  margin-bottom: 24px;
+}
+
+.staff-schedule-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  min-height: 130px;
+  padding: 24px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+}
+
+.staff-weekly-schedule {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.staff-day-card {
+  min-width: 0;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.staff-day-card:has(.staff-day-toggle input:checked) {
+  background: #fff;
+  border-color: #bfdbfe;
+}
+
+.staff-day-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.staff-day-card__header h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.staff-day-toggle,
+.staff-day-off {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.staff-day-toggle input,
+.staff-day-off input,
+.staff-service-option input {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.staff-day-toggle input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.staff-day-off {
+  margin-bottom: 14px;
+  color: #b45309;
+}
+
+.staff-time-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.staff-time-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.staff-time-fields input {
+  width: 100%;
+  min-height: 39px;
+  padding: 8px 10px;
+  color: #172033;
+  font: inherit;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  outline: none;
+}
+
+.staff-time-fields input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 10%);
+}
+
+.staff-day-unavailable {
+  margin: 0;
+  padding: 13px 0 2px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-style: italic;
+  border-top: 1px solid #e2e8f0;
+}
+
+.staff-services-assignment {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.staff-services-assignment > p {
+  margin-bottom: 18px;
+}
+
+.staff-service-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.staff-service-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 15px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.staff-service-option:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.staff-service-option input {
+  margin-top: 2px;
+}
+
+.staff-service-option > span {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.staff-service-option strong {
+  color: #172033;
+  font-size: 13px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.staff-service-option small {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.staff-schedule-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.staff-schedule-actions .staff-schedule-button {
+  min-width: 160px;
+}
+
+.staff-schedule-error,
+.staff-schedule-success {
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 9px;
+}
+
+.staff-schedule-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.staff-schedule-success {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+@media (max-width: 1100px) {
+  .staff-create-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .staff-create-form .staff-schedule-button {
+    width: fit-content;
+  }
+
+  .staff-weekly-schedule {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .staff-create-form {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    }
+
+    .staff-create-form > label:nth-child(3) {
+    grid-column: auto;
+    }
+
+    .staff-create-form > .staff-schedule-button {
+    grid-column: auto;
+    width: 100%;
+    }
+    }
+
+@media (max-width: 480px) {
+  .staff-schedule-page {
+    padding: 16px;
+  }
+
+  .staff-schedule-header h1 {
+    font-size: 26px;
+  }
+
+  .staff-schedule-panel {
+    padding: 16px;
+  }
+
+  .staff-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-create-form .staff-schedule-button {
+    width: 100%;
+  }
+
+  .staff-day-card {
+    padding: 14px;
+  }
+
+  .staff-day-card__header {
+    align-items: flex-start;
+  }
+
+  .staff-time-fields {
+    gap: 8px;
+  }
+
+  .staff-schedule-actions .staff-schedule-button {
+    width: 100%;
+  }
+}

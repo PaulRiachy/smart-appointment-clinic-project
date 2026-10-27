@@ -13,6 +13,7 @@ import AP_DatePicker from '../components/AP_DatePicker';
 import AP_Modal from '../components/AP_Modal';
 import AP_Button from '../components/AP_Button';
 import './styles/AppointmentSlots.css';
+import './styles/MyAppointments.css';
 
 type AppointmentView = IAppointment & {
   service: string | IService;

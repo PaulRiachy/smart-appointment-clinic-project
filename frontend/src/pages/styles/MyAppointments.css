@@ -1,0 +1,190 @@
+.customer-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+
+.customer-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.customer-page .page-header h1 {
+  margin: 8px 0;
+}
+
+.customer-page .page-header p {
+  color: #64748b;
+}
+
+.customer-page .appointment-section {
+  margin-bottom: 36px;
+}
+
+.customer-page .appointment-section > h2 {
+  margin-bottom: 18px;
+}
+
+.customer-page .appointment-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.customer-page .appointment-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 5%);
+  box-sizing: border-box;
+}
+
+.customer-page .appointment-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customer-page .appointment-card-header > div {
+  min-width: 0;
+}
+
+.customer-page .appointment-card-header h3 {
+  margin: 6px 0 0;
+  color: #0f172a;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.customer-page .eyebrow {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.customer-page .status-pill {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.customer-page .status-pill.confirmed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.customer-page .status-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.customer-page .status-pill.cancelled,
+.customer-page .status-pill.no_show {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.customer-page .status-pill.completed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.customer-page .appointment-card .appointment-time {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+}
+
+.customer-page .appointment-card > p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.customer-page .appointment-card .appointment-reference {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.customer-page .appointment-card .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.customer-page .form-actions button {
+  max-width: 100%;
+}
+
+.customer-page .panel,
+.customer-page .empty-state {
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.customer-page .error-message,
+.customer-page .success-message {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.customer-page .error-message {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.customer-page .success-message {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+@media (max-width: 640px) {
+  .customer-page {
+    padding: 20px 14px;
+  }
+
+  .customer-page .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .customer-page .appointment-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .customer-page .appointment-card {
+    padding: 18px;
+  }
+}

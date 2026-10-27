@@ -118,3 +118,21 @@ export function requireRole(...roles: UserRole[]) {
     next();
   };
 }
+
+export function optionalAuthenticate(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  const authorization = req.headers.authorization;
+  const token = authorization?.startsWith('Bearer ')
+    ? authorization.slice(7).trim()
+    : '';
+
+  if (!token) {
+    next();
+    return;
+  }
+
+  void authenticate(req, res, next);
+}

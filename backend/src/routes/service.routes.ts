@@ -5,12 +5,16 @@ import {
   updateService,
   updateServiceStatus,
 } from '../controllers/service.controller';
-import { authenticate, requireRole } from '../middleware/auth.middleware';
+import {
+  authenticate,
+  optionalAuthenticate,
+  requireRole,
+} from '../middleware/auth.middleware';
 import { UserRole } from '@app/shared';
 
 const router = Router();
 
-router.get('/', listServices);
+router.get('/', optionalAuthenticate, listServices);
 
 router.post(
   '/',

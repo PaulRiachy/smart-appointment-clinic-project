@@ -171,28 +171,33 @@ export async function checkInAppointment(
   req: AuthenticatedRequest,
   res: Response<ApiResponse>,
 ): Promise<Response> {
-  const { appointmentId } = req.body as {
-    appointmentId?: string;
+  const { reference } = req.body as {
+    reference?: string;
   };
 
-  if (!appointmentId || !Types.ObjectId.isValid(appointmentId)) {
+  const normalizedReference =
+    typeof reference === 'string' ? reference.trim() : '';
+
+  if (!normalizedReference) {
     return res.status(400).json({
       success: false,
-      message: 'A valid appointmentId is required',
-      error: 'INVALID_APPOINTMENT_ID',
+      message: 'Appointment reference is required',
+      error: 'INVALID_APPOINTMENT_REFERENCE',
     });
   }
 
-  const appointment = await Appointment.findById(appointmentId);
+  const appointment = await Appointment.findOne({
+    reference: normalizedReference,
+  });
 
   if (!appointment) {
     return res.status(404).json({
       success: false,
-      message: 'Appointment not found',
+      message: 'Appointment not found for the supplied reference',
       error: 'APPOINTMENT_NOT_FOUND',
     });
   }
-
+  
   if (appointment.status === AppointmentStatus.CHECKED_IN) {
     return res.status(409).json({
       success: false,

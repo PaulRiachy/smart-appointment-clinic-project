@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 
-import { IUser } from '@app/shared';
+import { type IUser } from '@app/shared';
 import api, {
   AUTH_TOKEN_KEY,
   AUTH_USER_KEY,
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem(AUTH_TOKEN_KEY),
   );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = useCallback((newToken: string, newUser: IUser) => {
     localStorage.setItem(AUTH_TOKEN_KEY, newToken);
@@ -75,39 +75,55 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (!storedToken) {
         if (isMounted) {
+          setToken(null);
+          setUser(null);
           setIsLoading(false);
         }
+
         return;
       }
 
       try {
         const response = await api.get('/auth/me');
 
-        const responseData = response.data?.data ?? response.data;
+        const authenticatedUser = response.data.data as IUser;
 
-        const authenticatedUser =
-          responseData?.user ?? responseData;
-
-        if (!authenticatedUser?._id) {
+        if (!authenticatedUser || !authenticatedUser._id) {
           throw new Error('Invalid authentication response.');
         }
 
         if (isMounted) {
           setToken(storedToken);
-          setUser(authenticatedUser as IUser);
+          setUser(authenticatedUser);
 
           localStorage.setItem(
             AUTH_USER_KEY,
             JSON.stringify(authenticatedUser),
           );
         }
-      } catch {
-        if (isMounted) {
+      } catch (error) {
+        const status =
+          error instanceof Error &&
+          'response' in error &&
+          typeof error.response === 'object' &&
+          error.response !== null &&
+          'status' in error.response
+            ? Number(error.response.status)
+            : undefined;
+
+        if (isMounted && status === 401) {
           localStorage.removeItem(AUTH_TOKEN_KEY);
           localStorage.removeItem(AUTH_USER_KEY);
+
           setToken(null);
           setUser(null);
         }
+
+        // Do NOT clear authentication for:
+        // - network errors
+        // - server errors
+        // - timeouts
+        // - temporary API failures
       } finally {
         if (isMounted) {
           setIsLoading(false);

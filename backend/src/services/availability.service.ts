@@ -461,14 +461,37 @@ export async function getAvailability(
       toMinutes,
     } = normaliseInterval(interval);
 
+    // A service must fit completely inside the staff
+    // working interval. If it is longer than the interval,
+    // there cannot be any valid appointment in this interval.
+    if (
+      fromMinutes >= toMinutes ||
+      context.service.duration <= 0 ||
+      context.service.duration > toMinutes - fromMinutes
+    ) {
+      continue;
+    }
+
     for (
       let startMinutes = fromMinutes;
-      startMinutes + context.service.duration <=
-      toMinutes;
+      startMinutes <=
+        toMinutes - context.service.duration;
       startMinutes += SLOT_STEP_MINUTES
     ) {
       const endMinutes =
         startMinutes + context.service.duration;
+
+      // Defensive full-interval validation.
+      //
+      // The appointment must START at or after the staff's
+      // working start AND END at or before the staff's
+      // working end.
+      if (
+        startMinutes < fromMinutes ||
+        endMinutes > toMinutes
+      ) {
+        continue;
+      }
 
       const startTime =
         timeFromMinutes(startMinutes);
@@ -495,14 +518,16 @@ export async function getAvailability(
           ),
       );
 
-      if (!blocked) {
-        slots.push({
-          start: slotStart.toISOString(),
-          end: slotEnd.toISOString(),
-          startTime,
-          endTime,
-        });
+      if (blocked) {
+        continue;
       }
+
+      slots.push({
+        start: slotStart.toISOString(),
+        end: slotEnd.toISOString(),
+        startTime,
+        endTime,
+      });
     }
   }
 

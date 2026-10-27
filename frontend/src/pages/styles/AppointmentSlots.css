@@ -1,0 +1,50 @@
+/* Shared availability legend for booking and rescheduling. */
+.slot-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.slot-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.slot-legend-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 999px;
+}
+
+.slot-legend-dot-available {
+  background: #16a34a;
+}
+
+/* The availability endpoint returns only free slots. Make them visibly selectable. */
+.slot.free {
+  cursor: pointer;
+}
+
+.slot.free:disabled {
+  cursor: not-allowed;
+}
+
+.slot.free:not(:disabled):hover {
+  border-color: #16a34a;
+}
+
+.slot.free.selected {
+  border-color: #15803d;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 1px #15803d;
+}

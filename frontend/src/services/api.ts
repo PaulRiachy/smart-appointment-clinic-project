@@ -7,8 +7,8 @@ import axios, {
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-export const AUTH_TOKEN_KEY = 'apex_auth_token';
-export const AUTH_USER_KEY = 'apex_auth_user';
+export const AUTH_TOKEN_KEY = 'auth_token';
+export const AUTH_USER_KEY = 'auth_user';
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

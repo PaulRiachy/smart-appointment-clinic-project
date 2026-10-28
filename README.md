@@ -260,9 +260,3 @@ Alternatively, build all workspace packages at once:
 npm run build
 
 ```
-
----
-
-## License
-
-ISC License. Developed by **Paul Riachy**.

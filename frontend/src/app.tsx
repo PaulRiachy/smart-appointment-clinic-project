@@ -1,4 +1,3 @@
-
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { UserRole } from '@app/shared';
 
@@ -6,7 +5,6 @@ import { useAuth } from './context/AuthContext';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Home from './pages/Home';
 import BookAppointment from './pages/BookAppointment';
 import MyAppointments from './pages/MyAppointments';
 import LiveQueue from './pages/LiveQueue';
@@ -47,6 +45,20 @@ function ProtectedRoute() {
   return <Outlet />;
 }
 
+// Get the specific landing page for a given user role
+function getRoleHomePath(role: UserRole): string {
+  switch (role) {
+    case UserRole.CUSTOMER:
+      return '/my-appointments';
+    case UserRole.STAFF:
+      return '/queue';
+    case UserRole.ADMIN:
+      return '/dashboard';
+    default:
+      return '/login';
+  }
+}
+
 function RoleProtectedRoute({
   allowedRoles,
 }: {
@@ -63,18 +75,7 @@ function RoleProtectedRoute({
   }
 
   if (!allowedRoles.includes(user.role)) {
-    return (
-      <Navigate
-        to={
-          user.role === UserRole.CUSTOMER
-            ? '/my-appointments'
-            : user.role === UserRole.ADMIN
-              ? '/dashboard'
-              : '/appointments'
-        }
-        replace
-      />
-    );
+    return <Navigate to={getRoleHomePath(user.role)} replace />;
   }
 
   return <Outlet />;
@@ -118,15 +119,7 @@ function RoleHome() {
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role === UserRole.CUSTOMER) {
-    return <Navigate to="/book" replace />;
-  }
-
-  if (user.role === UserRole.ADMIN) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <Navigate to="/appointments" replace />;
+  return <Navigate to={getRoleHomePath(user.role)} replace />;
 }
 
 export default function App() {
@@ -160,8 +153,16 @@ export default function App() {
         }
       />
 
-      {/* Public home page */}
-      <Route path="/" element={<Home />} />
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <RoleHome />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
 
       {/* Customer routes */}
       <Route element={<ProtectedRoute />}>
@@ -240,7 +241,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* Redirect unknown routes according to the signed-in role */}
+      {/* Catch-all route */}
       <Route
         path="*"
         element={

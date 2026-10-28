@@ -69,7 +69,6 @@ function dateInBeirut(date: Date): string {
 }
 
 function formatDate(value: string): string {
-  // Date-only values are parsed at UTC noon so they cannot shift to the prior day.
   const dateOnly = value.includes('T') ? dateInBeirut(new Date(value)) : value.slice(0, 10);
   return new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Beirut',
@@ -429,11 +428,13 @@ export default function MyAppointments() {
         <section className="panel empty-state">
           <h2>No appointments yet</h2>
           <p>Book an appointment to see your reservation details here.</p>
-          <AP_Button
-            onClick={() => navigate('/book')}
+          <button
+          className="primary-button"
+          type="button"
+          onClick={() => navigate('/book')}
           >
-            Book appointment
-          </AP_Button>
+          Book appointment
+        </button>
         </section>
       ) : (
         <>

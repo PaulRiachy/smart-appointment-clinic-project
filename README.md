@@ -1,6 +1,6 @@
 # Smart Appointment & Clinic Queue Management System
 
-A production-ready, full-stack MERN monorepo for managing clinic service appointments, staff schedules, customer booking workflows, and real-time waiting room queues. Built with strict TypeScript contract enforcement across shared interfaces, concurrency-safe booking logic, and real-time Socket.IO synchronization.
+A full-stack MERN monorepo for managing clinic service appointments, staff schedules, customer booking workflows, and real-time waiting room queues. Built with strict TypeScript contract enforcement across shared interfaces, concurrency-safe booking logic, and real-time Socket.IO synchronization.
 
 ---
 

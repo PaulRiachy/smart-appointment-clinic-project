@@ -1,4 +1,5 @@
 
+import './styles/Auth.css';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import type { IUser } from '@app/shared';

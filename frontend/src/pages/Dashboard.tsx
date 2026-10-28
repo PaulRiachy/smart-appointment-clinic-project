@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
+import DashboardAppointments, { appointmentDate } from '../components/DashboardAppointments';
 import './styles/Dashboard.css';
 
 interface DashboardMetrics {
@@ -160,15 +161,7 @@ function formatCurrency(value: number): string {
 }
 
 function getDateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(
-    date.getMonth() + 1,
-  ).padStart(2, '0');
-  const day = String(
-    date.getDate(),
-  ).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
+  return appointmentDate(date.toISOString());
 }
 
 function getDefaultRange(): {
@@ -214,7 +207,11 @@ export default function Dashboard() {
 
   const [error, setError] = useState('');
 
-  const loadStats = useCallback(async () => {
+  const loadStats = useCallback(async (signal?: AbortSignal) => {
+    if (!dateRange.startDate || !dateRange.endDate || dateRange.startDate > dateRange.endDate) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setError('');
 
@@ -222,6 +219,7 @@ export default function Dashboard() {
       const response = await api.get(
         '/dashboard/stats',
         {
+          signal,
           params: {
             startDate: dateRange.startDate,
             endDate: dateRange.endDate,
@@ -234,8 +232,9 @@ export default function Dashboard() {
         response.data.data,
       );
 
-      setDashboard(data);
+      if (!signal?.aborted) setDashboard(data);
     } catch (requestError: unknown) {
+      if (signal?.aborted) return;
       console.error(
         'Failed to load dashboard:',
         requestError,
@@ -245,12 +244,14 @@ export default function Dashboard() {
         getErrorMessage(requestError),
       );
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) setIsLoading(false);
     }
   }, [dateRange]);
 
   useEffect(() => {
-    void loadStats();
+    const controller = new AbortController();
+    void loadStats(controller.signal);
+    return () => controller.abort();
   }, [loadStats]);
 
   const maxVolume = useMemo(() => {
@@ -485,6 +486,7 @@ export default function Dashboard() {
           </div>
         )
       )}
+      <DashboardAppointments startDate={dateRange.startDate} endDate={dateRange.endDate} />
     </main>
   );
 }

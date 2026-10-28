@@ -1,3 +1,4 @@
+import './styles/AP_Modal.css';
 import { useEffect, type ReactNode } from 'react';
 
 export interface APModalAction {

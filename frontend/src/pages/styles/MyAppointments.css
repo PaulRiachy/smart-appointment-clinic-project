@@ -1,26 +1,4 @@
-.customer-page {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
-  box-sizing: border-box;
-}
-
-.customer-page .page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.customer-page .page-header h1 {
-  margin: 8px 0;
-}
-
-.customer-page .page-header p {
-  color: #64748b;
-}
+/* Appointment cards and history. */
 
 .customer-page .appointment-section {
   margin-bottom: 36px;
@@ -31,9 +9,6 @@
 }
 
 .customer-page .appointment-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-  gap: 20px;
   align-items: stretch;
 }
 
@@ -42,24 +17,7 @@
   flex-direction: column;
   align-items: stretch;
   gap: 16px;
-  min-width: 0;
-  padding: 22px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 4px 14px rgb(15 23 42 / 5%);
   box-sizing: border-box;
-}
-
-.customer-page .appointment-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.customer-page .appointment-card-header > div {
-  min-width: 0;
 }
 
 .customer-page .appointment-card-header h3 {
@@ -68,47 +26,6 @@
   font-size: 1.1rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
-}
-
-.customer-page .eyebrow {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.customer-page .status-pill {
-  flex-shrink: 0;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.customer-page .status-pill.confirmed {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.customer-page .status-pill.pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.customer-page .status-pill.cancelled,
-.customer-page .status-pill.no_show {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.customer-page .status-pill.completed {
-  background: #dbeafe;
-  color: #1e40af;
 }
 
 .customer-page .appointment-card .appointment-time {
@@ -140,51 +57,160 @@
   padding-top: 4px;
 }
 
-.customer-page .form-actions button {
-  max-width: 100%;
+.customer-page .appointment-section {
+  margin-top: 38px;
 }
 
-.customer-page .panel,
-.customer-page .empty-state {
-  padding: 24px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
+.customer-page .appointment-section > h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  color: #172033;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.45px;
+}
+
+.customer-page .appointment-section > h2 span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 8px;
+  color: #3157d5;
+  background: #edf2ff;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.customer-page .appointment-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.customer-page .appointment-card {
+  min-width: 0;
+  padding: 23px;
   background: #fff;
+  border: 1px solid #e1e7f0;
+  border-radius: 18px;
+  box-shadow: 0 5px 20px rgba(24, 39, 75, 0.035);
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
-.customer-page .error-message,
-.customer-page .success-message {
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  border-radius: 10px;
+.customer-page .appointment-card:hover {
+  border-color: #c8d4f0;
+  box-shadow: 0 10px 28px rgba(24, 39, 75, 0.07);
+  transform: translateY(-2px);
 }
 
-.customer-page .error-message {
-  background: #fef2f2;
-  color: #991b1b;
+.customer-page .appointment-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 17px;
 }
 
-.customer-page .success-message {
-  background: #f0fdf4;
-  color: #166534;
+.customer-page .appointment-card-header > div {
+  min-width: 0;
 }
 
-@media (max-width: 640px) {
-  .customer-page {
-    padding: 20px 14px;
-  }
+.customer-page .appointment-card-header .eyebrow {
+  margin-bottom: 7px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
 
-  .customer-page .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 16px;
-  }
+.customer-page .appointment-card h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.35px;
+  overflow-wrap: anywhere;
+}
 
+.customer-page .appointment-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 12px 13px;
+  color: #2545b5;
+  background: #f4f7ff;
+  border: 1px solid #e7edff;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.customer-page .appointment-card > p:not(.eyebrow):not(.appointment-time):not(.appointment-reference) {
+  margin: 10px 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.customer-page .appointment-card p strong {
+  color: #344054;
+  font-weight: 700;
+}
+
+.customer-page .appointment-reference {
+  margin: 15px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #edf0f5;
+  color: #667085;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.customer-page .empty-state {
+  padding: 52px 24px;
+  text-align: center;
+  box-shadow: 0 8px 28px rgba(24, 39, 75, 0.04);
+}
+
+.customer-page .empty-state h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.customer-page .empty-state p {
+  max-width: 420px;
+  margin: 0 auto 22px;
+}
+
+.customer-page .empty-state button {
+  width: auto;
+}
+
+@media (max-width: 760px) {
   .customer-page .appointment-list {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 
+  .customer-page .appointment-section {
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 420px) {
   .customer-page .appointment-card {
-    padding: 18px;
+    padding: 17px;
+  }
+
+  .customer-page .appointment-card-header {
+    flex-direction: column;
   }
 }

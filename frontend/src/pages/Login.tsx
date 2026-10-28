@@ -6,6 +6,7 @@ import AP_Button from '../components/AP_Button';
 import AP_Textbox from '../components/AP_Textbox';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import './styles/Auth.css';
 
 interface AuthResponse {
   token?: string;

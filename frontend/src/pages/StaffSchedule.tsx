@@ -20,6 +20,23 @@ const WEEKDAYS = [
   { value: Weekday.SUNDAY, label: 'Sunday' },
 ];
 
+function createEmptySchedule(staffId: string): IStaffSchedule {
+  return {
+    _id: '',
+    staff: staffId,
+    weeklyIntervals: {
+      [Weekday.MONDAY]: [],
+      [Weekday.TUESDAY]: [],
+      [Weekday.WEDNESDAY]: [],
+      [Weekday.THURSDAY]: [],
+      [Weekday.FRIDAY]: [],
+      [Weekday.SATURDAY]: [],
+      [Weekday.SUNDAY]: [],
+    },
+    daysOff: [],
+    services: [],
+  };
+}
 
 function getErrorMessage(error: unknown, fallback: string): string {
   if (typeof error === 'object' && error !== null && 'response' in error) {
@@ -43,6 +60,7 @@ export default function StaffSchedule() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
   const [isCreatingStaff, setIsCreatingStaff] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -90,7 +108,7 @@ export default function StaffSchedule() {
     }
   }, []);
 
-  const loadSchedule = useCallback(async () => {
+  const loadSchedule = useCallback(async (signal?: AbortSignal) => {
     if (!selectedStaffId) {
       setSchedule(null);
       return;
@@ -98,18 +116,35 @@ export default function StaffSchedule() {
 
     setError('');
     setSuccess('');
+    setSchedule(null);
+    setIsLoadingSchedule(true);
 
     try {
       const response = await api.get(
         `/staff/${selectedStaffId}/schedule`,
+        { signal },
       );
 
-      setSchedule(response.data.data as IStaffSchedule);
+      if (signal?.aborted) return;
+
+      const data = response.data.data as
+        | IStaffSchedule
+        | { staff: IUser; schedule: null }
+        | null;
+
+      setSchedule(
+        !data || ('schedule' in data && data.schedule === null)
+          ? createEmptySchedule(selectedStaffId)
+          : data as IStaffSchedule,
+      );
     } catch (requestError: unknown) {
+      if (signal?.aborted) return;
       setSchedule(null);
       setError(
         getErrorMessage(requestError, 'Unable to load this staff schedule.'),
       );
+    } finally {
+      if (!signal?.aborted) setIsLoadingSchedule(false);
     }
   }, [selectedStaffId]);
 
@@ -118,7 +153,9 @@ export default function StaffSchedule() {
   }, [loadInitialData]);
 
   useEffect(() => {
-    void loadSchedule();
+    const controller = new AbortController();
+    void loadSchedule(controller.signal);
+    return () => controller.abort();
   }, [loadSchedule]);
 
   function updateInterval(
@@ -394,10 +431,11 @@ export default function StaffSchedule() {
           Staff member
           <select
             value={selectedStaffId}
-            onChange={(event) =>
-              setSelectedStaffId(event.target.value)
-            }
-            disabled={isLoading || staff.length === 0}
+            onChange={(event) => {
+              setSchedule(null);
+              setSelectedStaffId(event.target.value);
+            }}
+            disabled={isLoading || isSaving || staff.length === 0}
           >
             {staff.length === 0 && (
               <option value="">No staff accounts available</option>
@@ -419,6 +457,10 @@ export default function StaffSchedule() {
           <div className="staff-schedule-state">
             Create or select a staff account to configure its schedule.
           </div>
+        ) : isLoadingSchedule ? (
+          <div className="staff-schedule-state" role="status">
+            Loading schedule…
+          </div>
         ) : !schedule ? (
           <div className="staff-schedule-state">
             No schedule data is available for {selectedStaff.fullName}.
@@ -432,6 +474,12 @@ export default function StaffSchedule() {
           </div>
         ) : (
           <>
+            {!schedule._id && (
+              <div className="staff-schedule-state" role="status">
+                No schedule has been configured for {selectedStaff.fullName} yet.
+                Set working hours and services below, then save the schedule.
+              </div>
+            )}
             <div className="staff-weekly-schedule">
               {WEEKDAYS.map(({ value, label }) => {
                 const intervals = schedule.weeklyIntervals[value] ?? [];

@@ -85,7 +85,8 @@
   font-weight: 600;
 }
 
-.dashboard-filters input {
+.dashboard-filters input,
+.dashboard-filters select {
   min-height: 42px;
   padding: 9px 12px;
   color: #1e293b;
@@ -97,7 +98,8 @@
   outline: none;
 }
 
-.dashboard-filters input:focus {
+.dashboard-filters input:focus,
+.dashboard-filters select:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgb(59 130 246 / 12%);
 }
@@ -308,6 +310,167 @@
   background: #fee2e2;
 }
 
+.dashboard-appointments {
+  margin-top: 26px;
+}
+
+.dashboard-appointment-filters {
+  padding: 0 0 20px;
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.dashboard-appointment-filters label {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.dashboard-appointment-filters .dashboard-appointment-search {
+  flex-basis: 260px;
+}
+
+.dashboard-filters select {
+  max-width: 100%;
+  text-transform: capitalize;
+}
+
+.dashboard-result-count {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.dashboard-appointments-table table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dashboard-appointments-table {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.dashboard-appointments-table > div {
+  overflow-x: auto;
+}
+
+.dashboard-appointments-table th {
+  padding: 13px 16px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dashboard-appointments-table td {
+  padding: 15px 16px;
+  border-top: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 13px;
+}
+
+.dashboard-appointments-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.dashboard-appointments-table td[colspan] {
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.dashboard-appointment-time {
+  display: grid;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.dashboard-appointment-time strong {
+  color: #334155;
+  font-weight: 600;
+}
+
+.dashboard-appointment-time span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.dashboard-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #475569;
+  background: #f1f5f9;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.dashboard-status--pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.dashboard-status--confirmed,
+.dashboard-status--checked_in,
+.dashboard-status--in_service {
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.dashboard-status--completed {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.dashboard-status--cancelled,
+.dashboard-status--no_show {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.dashboard-pagination,
+.dashboard-pagination > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dashboard-pagination {
+  margin-top: 18px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.dashboard-table-button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-table-button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.dashboard-table-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 900px) {
   .dashboard-page {
     padding: 22px;
@@ -324,6 +487,16 @@
 }
 
 @media (max-width: 560px) {
+  .dashboard-appointments .dashboard-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-appointment-filters label,
+  .dashboard-appointment-filters .dashboard-appointment-search {
+    flex-basis: auto;
+  }
+
   .dashboard-page {
     padding: 16px;
   }

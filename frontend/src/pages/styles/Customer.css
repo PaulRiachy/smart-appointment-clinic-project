@@ -1,0 +1,423 @@
+/* Shared customer page layout, controls, and feedback. */
+
+.customer-page {
+  max-width: 1200px;
+  box-sizing: border-box;
+}
+
+.customer-page .page-header p {
+  color: #64748b;
+}
+
+.customer-page .eyebrow {
+  text-transform: uppercase;
+}
+
+.customer-page .status-pill {
+  background: #f1f5f9;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.customer-page .form-actions button {
+  max-width: 100%;
+}
+
+.customer-page .error-message,
+.customer-page .success-message {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .customer-page .page-header {
+    flex-direction: column;
+  }
+}
+
+.customer-page {
+  min-height: calc(100vh - 76px);
+  padding: 44px 0 72px;
+}
+
+.customer-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 36px;
+  padding: 30px;
+  border: 1px solid #e3e9f4;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(49, 87, 213, 0.10), transparent 42%),
+    #fff;
+  box-shadow: 0 8px 28px rgba(24, 39, 75, 0.045);
+}
+
+.customer-page .page-header h1 {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  line-height: 1.15;
+}
+
+.customer-page .page-header p:not(.eyebrow) {
+  margin: 0;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.customer-page .eyebrow {
+  margin: 0 0 10px;
+  color: #3157d5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.customer-page .primary-button,
+.customer-page .secondary-button,
+.customer-page .danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease,
+    transform 160ms ease, box-shadow 160ms ease;
+}
+
+.customer-page .primary-button {
+  flex-shrink: 0;
+  color: #fff;
+  background: #3157d5;
+  box-shadow: 0 4px 10px rgba(49, 87, 213, 0.18);
+}
+
+.customer-page .primary-button:hover {
+  background: #2545b5;
+  transform: translateY(-1px);
+}
+
+.customer-page .secondary-button {
+  color: #344054;
+  background: #fff;
+  border-color: #dce3ee;
+}
+
+.customer-page .secondary-button:hover {
+  background: #f6f8fc;
+  border-color: #b9c6dc;
+}
+
+.customer-page .danger-button {
+  color: #b42318;
+  background: #fff;
+  border-color: #f3c6c2;
+}
+
+.customer-page .danger-button:hover {
+  background: #fff3f2;
+  border-color: #e9a7a1;
+}
+
+.customer-page button:focus-visible {
+  outline: 3px solid rgba(49, 87, 213, 0.28);
+  outline-offset: 3px;
+}
+
+.customer-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.customer-page .error-message,
+.customer-page .success-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.customer-page .error-message {
+  color: #912018;
+  background: #fff4f2;
+  border-color: #ffd5d0;
+}
+
+.customer-page .success-message {
+  color: #176448;
+  background: #effaf5;
+  border-color: #b7e8d1;
+}
+
+.customer-page .error-message button,
+.customer-page .success-message button {
+  flex-shrink: 0;
+  padding: 2px 5px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.customer-page .status-pill {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.45px;
+}
+
+.customer-page .status-pill.pending {
+  color: #975a16;
+  background: #fff6df;
+  border-color: #f4e2ae;
+}
+
+.customer-page .status-pill.confirmed {
+  color: #2451b7;
+  background: #edf3ff;
+  border-color: #d5e2ff;
+}
+
+.customer-page .status-pill.checked_in,
+.customer-page .status-pill.in_service {
+  color: #6941a5;
+  background: #f3edff;
+  border-color: #e4d7ff;
+}
+
+.customer-page .status-pill.completed {
+  color: #176448;
+  background: #eaf8f0;
+  border-color: #c8ecd7;
+}
+
+.customer-page .status-pill.cancelled,
+.customer-page .status-pill.no_show {
+  color: #a12b25;
+  background: #fff0ee;
+  border-color: #f5d0cb;
+}
+
+.customer-page .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.customer-page .form-actions > button {
+  flex: 1;
+}
+
+.customer-page .panel {
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e1e7f0;
+  border-radius: 16px;
+}
+
+.customer-page .panel p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.customer-page .field-label {
+  display: block;
+  margin: 20px 0 10px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+@media (max-width: 760px) {
+  .customer-page {
+    padding: 26px 0 48px;
+  }
+
+  .customer-page .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px 20px;
+    margin-bottom: 28px;
+  }
+
+  .customer-page .page-header > button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .customer-page .form-actions {
+    flex-direction: column;
+  }
+
+  .customer-page .form-actions > button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customer-page * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+.customer-page {
+  width: min(1120px, calc(100% - 32px));
+  margin: 32px auto 56px;
+  color: #182230;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1,
+.page-header h2 {
+  margin: 0 0 8px;
+  color: #182230;
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+
+.page-header p {
+  margin: 0;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.panel {
+  margin-bottom: 22px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgb(16 24 40 / 5%);
+}
+
+.panel h2,
+.panel h3 {
+  margin-top: 0;
+  color: #182230;
+  font-weight: 700;
+}
+
+.panel p {
+  line-height: 1.6;
+}
+
+.form-actions button:focus-visible {
+  outline: 3px solid rgb(49 87 213 / 35%);
+  outline-offset: 3px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions button {
+  min-height: 44px;
+  padding: 11px 18px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #fff;
+  color: #344054;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.form-actions button:hover:not(:disabled) {
+  background: #f2f4f7;
+}
+
+.form-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.form-actions button[type="submit"],
+.form-actions .primary-button {
+  border-color: #3157d5;
+  background: #3157d5;
+  color: #fff;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled),
+.form-actions .primary-button:hover:not(:disabled) {
+  background: #2446b5;
+}
+
+.error-message {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+  background: #fff4f2;
+  color: #b42318;
+  line-height: 1.5;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: #344054;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .customer-page {
+    width: min(100% - 24px, 560px);
+    margin-top: 22px;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .form-actions {
+    align-items: stretch;
+  }
+
+  .form-actions button {
+    flex: 1 1 140px;
+  }
+}

@@ -1,4 +1,5 @@
 
+import './styles/Home.css';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AP_Button from '../components/AP_Button';

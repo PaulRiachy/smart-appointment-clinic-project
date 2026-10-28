@@ -1,3 +1,4 @@
+import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {
@@ -11,8 +12,6 @@ import {
 import {
   SocketProvider,
 } from './context/SocketContext';
-
-import './index.css';
 
 ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,

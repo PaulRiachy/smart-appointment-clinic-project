@@ -9,10 +9,32 @@ import {
 
 import api from '../services/api';
 import AP_Modal from '../components/AP_Modal';
+import AP_DatePicker from '../components/AP_DatePicker';
 import './styles/Appointments.css';
 
 type SortOrder = 'earliest' | 'latest';
-type AppointmentAction = 'confirm' | 'cancel';
+type AppointmentAction = 'confirm' | 'cancel' | 'reschedule';
+
+type AvailableSlot = { start: string; end: string };
+
+function dateInBeirut(value: string | number): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Beirut',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date(value));
+  const part = (type: string) => parts.find((item) => item.type === type)?.value;
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+function getId(value: string | { _id: string }): string {
+  return typeof value === 'string' ? value : value._id;
+}
+
+function formatTime(value: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Beirut', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).format(new Date(value));
+}
 
 function getPersonName(value: string | IUser | undefined): string {
   if (!value) return '—';
@@ -80,6 +102,11 @@ export default function Appointments() {
     useState<IAppointment | null>(null);
   const [pendingAction, setPendingAction] =
     useState<AppointmentAction | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [slots, setSlots] = useState<AvailableSlot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState('');
 
   const loadAppointments = useCallback(async () => {
     setIsLoading(true);
@@ -109,6 +136,43 @@ export default function Appointments() {
     void loadAppointments();
   }, [loadAppointments]);
 
+  useEffect(() => {
+    if (pendingAction !== 'reschedule' || !selectedAppointment) return;
+
+    const appointment = selectedAppointment;
+    let cancelled = false;
+    setLoadingSlots(true);
+    setSlots([]);
+    setSelectedSlot(null);
+    setSlotsError('');
+
+    async function loadSlots() {
+      try {
+        const response = await api.get('/appointments/availability', {
+          params: {
+            serviceId: getId(appointment.service),
+            staffId: getId(appointment.staff),
+            date: rescheduleDate,
+          },
+        });
+        const data = response.data.data as { slots: AvailableSlot[] };
+        if (!cancelled) {
+          setSlots(data.slots.filter((slot) =>
+            new Date(slot.start).getTime() > Date.now() &&
+            new Date(slot.start).getTime() !== new Date(appointment.start).getTime(),
+          ));
+        }
+      } catch (error: unknown) {
+        if (!cancelled) setSlotsError(getErrorMessage(error, 'Unable to load available times.'));
+      } finally {
+        if (!cancelled) setLoadingSlots(false);
+      }
+    }
+
+    void loadSlots();
+    return () => { cancelled = true; };
+  }, [pendingAction, selectedAppointment, rescheduleDate]);
+
   const pendingAppointments = useMemo(() => {
     return appointments
       .filter(
@@ -132,6 +196,13 @@ export default function Appointments() {
     setSelectedAppointment(appointment);
     setPendingAction(action);
     setActionError('');
+    setRescheduleDate(
+      dateInBeirut(Math.max(new Date(appointment.start).getTime(), Date.now())),
+    );
+    setSlots([]);
+    setSelectedSlot(null);
+    setSlotsError('');
+    setLoadingSlots(action === 'reschedule');
   }
 
   function closeAction() {
@@ -146,17 +217,18 @@ export default function Appointments() {
     if (!selectedAppointment || !pendingAction || isSaving) {
       return;
     }
+    if (pendingAction === 'reschedule' && (!selectedSlot || loadingSlots || slotsError)) return;
 
     setIsSaving(true);
     setActionError('');
 
     try {
-      const endpoint =
-        pendingAction === 'confirm'
-          ? `/appointments/${selectedAppointment._id}/confirm`
-          : `/appointments/${selectedAppointment._id}/cancel`;
+      const endpoint = `/appointments/${selectedAppointment._id}/${pendingAction}`;
 
-      const response = await api.patch(endpoint);
+      const response = await api.patch(
+        endpoint,
+        pendingAction === 'reschedule' ? { start: selectedSlot!.start } : undefined,
+      );
       const updatedAppointment = response.data.data as
         | IAppointment
         | undefined;
@@ -171,15 +243,26 @@ export default function Appointments() {
             updatedAppointment &&
             updatedAppointment._id === selectedAppointment._id
           ) {
-            return updatedAppointment;
+            return {
+              ...appointment,
+              ...updatedAppointment,
+              customer: appointment.customer,
+              service: appointment.service,
+              staff: appointment.staff,
+            };
           }
 
           return {
             ...appointment,
+            ...(pendingAction === 'reschedule' && selectedSlot
+              ? { start: selectedSlot.start, end: selectedSlot.end }
+              : {}),
             status:
               pendingAction === 'confirm'
                 ? AppointmentStatus.CONFIRMED
-                : AppointmentStatus.CANCELLED,
+                : pendingAction === 'cancel'
+                  ? AppointmentStatus.CANCELLED
+                  : appointment.status,
           };
         }),
       );
@@ -199,12 +282,16 @@ export default function Appointments() {
   }
 
   const modalTitle =
-    pendingAction === 'confirm'
+    pendingAction === 'reschedule'
+      ? 'Reschedule appointment'
+      : pendingAction === 'confirm'
       ? 'Confirm appointment'
       : 'Cancel appointment';
 
   const modalActionLabel =
-    pendingAction === 'confirm'
+    pendingAction === 'reschedule'
+      ? 'Confirm new time'
+      : pendingAction === 'confirm'
       ? 'Confirm booking'
       : 'Cancel booking';
 
@@ -220,7 +307,7 @@ export default function Appointments() {
 
           <p className="appointments-page__description">
             Review booking requests, sort them by appointment time,
-            and confirm or cancel each request.
+            and confirm, reschedule or cancel each request.
           </p>
         </div>
 
@@ -337,6 +424,13 @@ export default function Appointments() {
               <div className="appointment-card__actions">
                 <button
                   type="button"
+                  className="appointments-button appointments-button--secondary"
+                  onClick={() => openAction(appointment, 'reschedule')}
+                >
+                  Reschedule
+                </button>
+                <button
+                  type="button"
                   className="appointments-button appointments-button--primary"
                   onClick={() =>
                     openAction(appointment, 'confirm')
@@ -378,13 +472,16 @@ export default function Appointments() {
               pendingAction === 'cancel' ? 'danger' : 'primary',
             onClick: submitAction,
             isLoading: isSaving,
-            disabled: !selectedAppointment || !pendingAction,
+            disabled: !selectedAppointment || !pendingAction ||
+              (pendingAction === 'reschedule' && (!selectedSlot || loadingSlots || Boolean(slotsError))),
           },
         ]}
       >
         <div className="appointment-confirmation">
           <p>
-            {pendingAction === 'confirm'
+            {pendingAction === 'reschedule'
+              ? `Choose an available time with ${getPersonName(selectedAppointment?.staff)}.`
+              : pendingAction === 'confirm'
               ? 'Confirm this booking? The appointment will be marked as confirmed.'
               : 'Cancel this booking? The pending appointment will be marked as cancelled.'}
           </p>
@@ -420,6 +517,48 @@ export default function Appointments() {
                 </dd>
               </div>
             </dl>
+          )}
+
+          {pendingAction === 'reschedule' && (
+            <div className="appointment-reschedule">
+              <AP_DatePicker
+                label="New appointment date"
+                value={rescheduleDate}
+                minDate={dateInBeirut(Date.now())}
+                disabled={isSaving}
+                onChange={(date) => {
+                  if (date === rescheduleDate) return;
+                  setRescheduleDate(date);
+                  setSelectedSlot(null);
+                  setSlots([]);
+                  setLoadingSlots(true);
+                  setActionError('');
+                }}
+              />
+              <p>All times are shown in Asia/Beirut.</p>
+              {loadingSlots ? (
+                <p role="status">Loading available times…</p>
+              ) : slotsError ? (
+                <p className="appointments-alert appointments-alert--modal" role="alert">{slotsError}</p>
+              ) : slots.length === 0 ? (
+                <p>No available times for this date. Try another date.</p>
+              ) : (
+                <div className="appointment-reschedule__slots" aria-label="Available times">
+                  {slots.map((slot) => (
+                    <button
+                      key={slot.start}
+                      type="button"
+                      className={`appointments-button appointments-button--${selectedSlot?.start === slot.start ? 'primary' : 'secondary'}`}
+                      disabled={isSaving}
+                      aria-pressed={selectedSlot?.start === slot.start}
+                      onClick={() => setSelectedSlot(slot)}
+                    >
+                      {formatTime(slot.start)} – {formatTime(slot.end)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {actionError && (

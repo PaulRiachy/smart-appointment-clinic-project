@@ -138,6 +138,7 @@
 
 .appointment-card__actions {
   display: flex;
+  flex-wrap: wrap;
   flex-shrink: 0;
   gap: 9px;
 }
@@ -279,6 +280,22 @@
 .appointments-alert--modal {
   display: block;
   margin: 16px 0 0;
+}
+
+.appointment-reschedule {
+  margin-top: 24px;
+}
+
+.appointment-reschedule > p {
+  color: #697386;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.appointment-reschedule__slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 9px;
 }
 
 @media (max-width: 760px) {

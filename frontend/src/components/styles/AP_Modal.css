@@ -1,0 +1,240 @@
+/* Shared modal layout and content. */
+
+.ap-modal-dialog .field-label {
+  display: block;
+  margin: 18px 0 10px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.ap-modal-dialog p {
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.ap-modal-dialog p strong {
+  color: #172033;
+}
+
+.ap-modal-dialog .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.ap-modal-dialog .form-actions > button {
+  width: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-modal-dialog * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+.ap-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(15 23 42 / 55%);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ap-modal-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 560px);
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  color: #1e293b;
+  box-shadow: 0 24px 70px rgb(15 23 42 / 25%);
+  animation: ap-modal-enter 160ms ease-out;
+}
+
+.ap-modal-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ap-modal-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.ap-modal-close {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ap-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.ap-modal-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 22px;
+}
+
+.ap-modal-content > :first-child {
+  margin-top: 0;
+}
+
+.ap-modal-content > :last-child {
+  margin-bottom: 0;
+}
+
+.ap-modal-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.ap-modal-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ap-modal-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ap-modal-action--primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.ap-modal-action--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.ap-modal-action--secondary {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.ap-modal-action--secondary:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.ap-modal-action--danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+.ap-modal-action--danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.ap-modal-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ap-modal-spin 700ms linear infinite;
+}
+
+@keyframes ap-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ap-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .ap-modal-overlay {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .ap-modal-dialog {
+    width: 100%;
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px;
+  }
+
+  .ap-modal-header,
+  .ap-modal-content {
+    padding: 16px;
+  }
+
+  .ap-modal-actions {
+    padding: 14px 16px;
+  }
+
+  .ap-modal-actions .ap-modal-action {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-modal-dialog,
+  .ap-modal-spinner {
+    animation: none;
+  }
+}

@@ -1,3 +1,4 @@
+import './styles/AP_Navbar.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '@app/shared';
 import { useAuth } from '../context/AuthContext';

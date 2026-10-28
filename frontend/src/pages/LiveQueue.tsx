@@ -389,7 +389,21 @@ export default function LiveQueue() {
             No active services right now.
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="serving-table-scroll" tabIndex={0} role="region" aria-label="Currently serving appointments">
+            <table className="serving-table">
+              <thead>
+                <tr>
+                  <th scope="col">Queue number</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Service</th>
+                  <th scope="col">Practitioner</th>
+                  <th scope="col">Started</th>
+                  <th scope="col">Time in service</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
             {servingEntries.map((entry) => {
               const appointment = getAppointment(entry);
               const service = appointment?.service;
@@ -397,62 +411,30 @@ export default function LiveQueue() {
               const customer = appointment?.customer;
 
               return (
-                <article
-                  key={entry._id}
-                  className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-indigo-700">
-                        {entry.queueNumber}
-                      </p>
-                      <h3 className="mt-1 text-lg font-semibold">
-                        {customer ? getPersonName(customer) : 'Customer'}
-                      </h3>
-                    </div>
-                    <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
-                      IN SERVICE
-                    </span>
-                  </div>
-
-                  <dl className="mt-4 space-y-2 text-sm">
-                    <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Service</dt>
-                      <dd className="text-right font-medium">
-                        {service ? getServiceName(service) : '—'}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Practitioner</dt>
-                      <dd className="text-right font-medium">
-                        {staff ? getPersonName(staff) : '—'}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Started</dt>
-                      <dd className="font-medium">
-                        {formatBeirutTime(entry.calledAt)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Time in service</dt>
-                      <dd className="font-medium">
-                        {minutesElapsed(entry.calledAt)} min
-                      </dd>
-                    </div>
-                  </dl>
-
-                  <button
-                    type="button"
-                    onClick={() => void handleQueueAction(entry, 'complete')}
-                    disabled={actingOnId === entry._id}
-                    className="mt-5 w-full rounded-lg border border-slate-300 px-4 py-2.5 font-medium hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    {actingOnId === entry._id ? 'Updating…' : 'Complete service'}
-                  </button>
-                </article>
+                <tr key={entry._id}>
+                  <td className="serving-table__number">{entry.queueNumber}</td>
+                  <td className="serving-table__customer">{customer ? getPersonName(customer) : 'Customer'}</td>
+                  <td>{service ? getServiceName(service) : '—'}</td>
+                  <td>{staff ? getPersonName(staff) : '—'}</td>
+                  <td className="serving-table__time">{formatBeirutTime(entry.calledAt)}</td>
+                  <td className="serving-table__time">{minutesElapsed(entry.calledAt)} min</td>
+                  <td><span className="serving-table__status">IN SERVICE</span></td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => void handleQueueAction(entry, 'complete')}
+                      disabled={actingOnId === entry._id}
+                      className="serving-table__complete"
+                      aria-label={`Complete service for ${customer ? getPersonName(customer) : 'Customer'}, queue ${entry.queueNumber}`}
+                    >
+                      {actingOnId === entry._id ? 'Updating…' : 'Complete service'}
+                    </button>
+                  </td>
+                </tr>
               );
             })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

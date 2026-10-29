@@ -1,6 +1,4 @@
-/* Shared availability slots for booking and rescheduling. */
-
-/* Shared availability legend for booking and rescheduling. */
+/* Shared availability slots for customer and staff booking/rescheduling. */
 
 .slot-legend {
   display: flex;
@@ -33,85 +31,72 @@
   background: #16a34a;
 }
 
-/* The availability endpoint returns only free slots. Make them visibly selectable. */
-
-.slot.free {
-  cursor: pointer;
-}
-
-.slot.free:disabled {
-  cursor: not-allowed;
-}
-
-.slot.free:not(:disabled):hover {
-  border-color: #16a34a;
-}
-
-.slot.free.selected {
-  border-color: #15803d;
-  background: #f0fdf4;
-  box-shadow: 0 0 0 1px #15803d;
-}
-
-.customer-page .slot-grid {
+.slot-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-top: 16px;
 }
 
-.customer-page .slot {
+.slot {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   min-width: 0;
+  min-height: 44px;
   padding: 13px 8px;
   color: #344054;
   background: #fff;
   border: 1px solid #dce3ee;
   border-radius: 12px;
+  font: inherit;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
 }
 
-.customer-page .slot strong {
+.slot strong {
   font-size: 14px;
   font-weight: 800;
 }
 
-.customer-page .slot small {
+.slot small {
   color: #667085;
   font-size: 11px;
 }
 
-.customer-page .slot.free:hover:not(:disabled) {
+.slot:hover:not(:disabled):not(.selected) {
   background: #f4f7ff;
   border-color: #9db3f5;
 }
 
-.customer-page .slot.selected {
+.slot.selected,
+.slot.selected:hover:not(:disabled) {
   color: #2545b5;
   background: #edf2ff;
   border-color: #3157d5;
-  box-shadow: 0 0 0 2px rgba(49, 87, 213, 0.1);
+  box-shadow: 0 0 0 2px rgb(49 87 213 / 10%);
 }
 
-.customer-page .slot.selected small {
+.slot.selected small {
   color: #3157d5;
 }
 
-.customer-page .slot.unavailable {
+.slot.unavailable,
+.slot:disabled,
+.slot.selected:disabled {
   color: #98a2b3;
   background: #f8f9fb;
   border-color: #edf0f5;
+  box-shadow: none;
   cursor: not-allowed;
+  opacity: 0.75;
 }
 
-@media (max-width: 420px) {
-  .customer-page .slot-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.slot:disabled small {
+  color: inherit;
 }
 
 .slot:focus-visible {
@@ -119,51 +104,7 @@
   outline-offset: 3px;
 }
 
-.slot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.slot {
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid #d8e0ec;
-  border-radius: 10px;
-  background: #fff;
-  color: #344054;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease,
-    color 150ms ease;
-}
-
-.slot:hover:not(:disabled) {
-  border-color: #3157d5;
-  background: #f4f7ff;
-}
-
-.slot.free {
-  border-color: #cdd8ef;
-}
-
-.slot.unavailable,
-.slot:disabled {
-  background: #f2f4f7;
-  color: #98a2b3;
-  cursor: not-allowed;
-  opacity: 0.75;
-}
-
-.slot.selected {
-  border-color: #3157d5;
-  background: #3157d5;
-  color: #fff;
-}
-
-@media (max-width: 400px) {
+@media (max-width: 420px) {
   .slot-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

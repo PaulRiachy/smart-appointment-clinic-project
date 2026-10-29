@@ -206,12 +206,6 @@
   line-height: 1.6;
 }
 
-.appointment-reschedule__slots {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 9px;
-}
-
 @media (max-width: 1024px) {
   .appointments-page .appointment-card {
     align-items: stretch;

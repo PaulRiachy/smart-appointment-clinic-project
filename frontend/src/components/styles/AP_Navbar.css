@@ -83,28 +83,130 @@
 }
 
 .app-navbar__account {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 16px;
   flex-shrink: 0;
 }
 
-.app-navbar__identity {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+.app-navbar__profile-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid #dce5fa;
+  border-radius: 50%;
+  background: #edf2ff;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.app-navbar__name {
-  max-width: 180px;
-  overflow: hidden;
-  color: #202b40;
-  font-size: 13px;
+.app-navbar__profile-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-navbar__profile-button:hover,
+.app-navbar__profile-button[aria-expanded='true'] {
+  border-color: #3157d5;
+  box-shadow: 0 0 0 3px rgb(49 87 213 / 10%);
+}
+
+.app-navbar__profile {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(320px, calc(100vw - 28px));
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  border: 1px solid #e1e7f0;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgb(24 39 75 / 16%);
+}
+
+.app-navbar__profile-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #667085;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.app-navbar__profile-close:hover {
+  color: #172033;
+  background: #f1f5fb;
+}
+
+.app-navbar__profile-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 36px 22px;
+  text-align: center;
+}
+
+.app-navbar__profile-summary img {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.app-navbar__profile-summary h2 {
+  max-width: 100%;
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
   font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.app-navbar__profile-details {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 20px 24px;
+  border-top: 1px solid #edf0f5;
+}
+
+.app-navbar__profile-details dt {
+  margin-bottom: 5px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.app-navbar__profile-details dd {
+  margin: 0;
+  color: #344054;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.app-navbar__profile-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #edf0f5;
+  background: #fafbfe;
 }
 
 .app-navbar__role {
@@ -112,19 +214,20 @@
   align-items: center;
   padding: 3px 9px;
   border-radius: 999px;
-  background: #f0f3f8;
-  color: #657087;
-  font-size: 11px;
+  background: #edf2ff;
+  color: #3157d5;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .app-navbar__logout {
-  min-height: 39px;
-  padding: 8px 14px;
-  border: 1px solid #dce2ec;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid #fecaca;
   border-radius: 9px;
   background: #ffffff;
-  color: #47536a;
+  color: #b42318;
   font: inherit;
   font-size: 13px;
   font-weight: 700;
@@ -136,13 +239,14 @@
 }
 
 .app-navbar__logout:hover {
-  border-color: #cbd5e5;
-  background: #f6f8fc;
-  color: #26344e;
+  border-color: #f87171;
+  background: #fef2f2;
 }
 
 .app-navbar__link:focus-visible,
 .app-navbar__brand:focus-visible,
+.app-navbar__profile-button:focus-visible,
+.app-navbar__profile-close:focus-visible,
 .app-navbar__logout:focus-visible {
   outline: 3px solid rgba(49, 87, 213, 0.35);
   outline-offset: 3px;
@@ -179,14 +283,6 @@
     height: 34px;
   }
 
-  .app-navbar__account {
-    gap: 8px;
-  }
-
-  .app-navbar__identity {
-    display: none;
-  }
-
   .app-navbar__links {
     gap: 5px;
   }
@@ -197,8 +293,4 @@
     font-size: 12px;
   }
 
-  .app-navbar__logout {
-    min-height: 36px;
-    padding: 7px 10px;
-  }
 }

@@ -158,6 +158,11 @@ main.management-page {
   line-height: 1.5;
 }
 
+.management-page:is(.dashboard-page, .live-queue-page) :is(th, td) {
+  text-align: center;
+  vertical-align: middle;
+}
+
 .management-page table th {
   color: var(--management-muted);
   background: #f8faff;

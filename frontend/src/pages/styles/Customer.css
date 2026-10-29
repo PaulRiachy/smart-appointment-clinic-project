@@ -229,6 +229,10 @@
 
 .customer-page .form-actions > button {
   flex: 1;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .customer-page .panel {

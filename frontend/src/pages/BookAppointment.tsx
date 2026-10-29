@@ -37,18 +37,6 @@ function getId(value: string | { _id: string } | undefined): string {
   return typeof value === 'string' ? value : value?._id ?? '';
 }
 
-function getName(value: string | IUser | undefined): string {
-  return typeof value === 'string' || !value
-    ? value ?? 'Unknown'
-    : value.fullName;
-}
-
-function getService(value: string | IService | undefined): string {
-  return typeof value === 'string' || !value
-    ? value ?? 'Unknown service'
-    : value.name;
-}
-
 function dateInBeirut(date: Date): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Beirut',
@@ -319,7 +307,7 @@ export default function BookAppointment() {
         </div>
         <button
           type="button"
-          className="secondary-button"
+          className="primary-button"
           onClick={() => navigate('/my-appointments')}
         >
           My appointments
@@ -600,10 +588,10 @@ export default function BookAppointment() {
           <div className="summary-card">
             <dl>
               <dt>Service</dt>
-              <dd>{getService(booking.service) || selectedService.name}</dd>
+              <dd>{(typeof booking.service === 'object' && booking.service?.name) || selectedService.name}</dd>
 
               <dt>Practitioner</dt>
-              <dd>{getName(booking.staff) || selectedStaff.fullName}</dd>
+              <dd>{(typeof booking.staff === 'object' && booking.staff?.fullName) || selectedStaff.fullName}</dd>
 
               <dt>Date</dt>
               <dd>{formatDate(dateInBeirut(new Date(booking.start)))}</dd>

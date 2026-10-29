@@ -549,12 +549,14 @@ export default function Appointments() {
                     <button
                       key={slot.start}
                       type="button"
-                      className={`slot${selectedSlot?.start === slot.start ? ' selected' : ''}`}
+                      className={`slot free${selectedSlot?.start === slot.start ? ' selected' : ''}`}
                       disabled={isSaving}
                       aria-pressed={selectedSlot?.start === slot.start}
                       onClick={() => setSelectedSlot(slot)}
                     >
-                      {formatTime(slot.start)} – {formatTime(slot.end)}
+                      <strong>{formatTime(slot.start)}</strong>
+                      <span>– {formatTime(slot.end)}</span>
+                      <small>Available</small>
                     </button>
                   ))}
                 </div>

@@ -23,7 +23,7 @@ function isValidTime(value: unknown): value is string {
 }
 
 function timeToMinutes(value: string): number {
-  const [hours, minutes] = value.split(':').map(Number);
+  const [hours = NaN, minutes = NaN] = value.split(':').map(Number);
   return hours * 60 + minutes;
 }
 
@@ -85,8 +85,8 @@ function isValidSchedulePayload(body: unknown): body is ScheduleInput {
     );
 
     for (let index = 1; index < sorted.length; index += 1) {
-      const previous = sorted[index - 1];
-      const current = sorted[index];
+      const previous = sorted[index - 1]!;
+      const current = sorted[index]!;
 
       if (
         timeToMinutes(current.from) < timeToMinutes(previous.to)
@@ -262,7 +262,7 @@ export async function saveStaffSchedule(
 
     for (const day of weekdays) {
       weeklyIntervals[day as Weekday] =
-        req.body.weeklyIntervals[day].map((interval) => ({
+        req.body.weeklyIntervals[day]!.map((interval) => ({
           from: interval.from,
           to: interval.to,
         }));

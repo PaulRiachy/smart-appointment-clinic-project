@@ -56,23 +56,11 @@ export default function Login() {
         password,
       });
 
-      console.log('Login response:', response.status, {
-        ...response.data,
-        token: response.data.token ? '[redacted]' : undefined,
-        accessToken: response.data.accessToken
-          ? '[redacted]'
-          : undefined,
-      });
-
       const payload = response.data.data ?? response.data;
       const token = payload.token ?? payload.accessToken;
       const user = payload.user;
 
       if (!token || !user) {
-        console.error(
-          'Unexpected login response structure:',
-          response.data,
-        );
         throw new Error(
           'Login succeeded, but the response did not contain the expected user and token.',
         );

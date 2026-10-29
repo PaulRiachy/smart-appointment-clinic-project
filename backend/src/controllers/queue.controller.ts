@@ -12,6 +12,7 @@ import {
 
 import { Appointment } from '../models/appointment.model';
 import { QueueEntry } from '../models/queue.model';
+import { businessDate } from '../utils/business-time';
 import {
   broadcastQueueCall,
   broadcastQueueCompletion,
@@ -63,33 +64,8 @@ function getQueueDateParts(date: Date): {
 function getBeirutDayStart(date: Date = new Date()): Date {
   const { year, month, day } = getQueueDateParts(date);
 
-  const approximateUtc = new Date(
-    Date.UTC(year, month - 1, day, 0, 0, 0, 0),
-  );
-
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: BEIRUT_TIMEZONE,
-    timeZoneName: 'shortOffset',
-  });
-
-  const parts = formatter.formatToParts(approximateUtc);
-  const offsetPart = parts.find(
-    (part) => part.type === 'timeZoneName',
-  )?.value;
-
-  const match = offsetPart?.match(/GMT([+-])(\d+)(?::(\d+))?/);
-
-  if (!match) {
-    return approximateUtc;
-  }
-
-  const sign = match[1] === '-' ? -1 : 1;
-  const offsetHours = Number(match[2]);
-  const offsetMinutes = Number(match[3] ?? 0);
-  const offsetMilliseconds =
-    sign * ((offsetHours * 60 + offsetMinutes) * 60 * 1000);
-
-  return new Date(approximateUtc.getTime() - offsetMilliseconds);
+  const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return businessDate(key);
 }
 
 function getNextQueueNumber(lastQueueNumber?: string): string {
@@ -236,6 +212,7 @@ export async function checkInAppointment(
       queueDate,
     })
       .sort({ queueNumber: -1 })
+      .collation({ locale: 'en', numericOrdering: true })
       .select('queueNumber')
       .lean();
 
@@ -391,7 +368,7 @@ export async function callQueueEntry(
 ): Promise<Response> {
   const { id } = req.params;
 
-  if (!Types.ObjectId.isValid(id.toString())) {
+  if (typeof id !== 'string' || !Types.ObjectId.isValid(id)) {
     return res.status(400).json({
       success: false,
       message: 'Invalid queue entry id',
@@ -529,7 +506,7 @@ export async function completeQueueEntry(
 ): Promise<Response> {
   const { id } = req.params;
 
-  if (!Types.ObjectId.isValid(id.toString())) {
+  if (typeof id !== 'string' || !Types.ObjectId.isValid(id)) {
     return res.status(400).json({
       success: false,
       message: 'Invalid queue entry id',

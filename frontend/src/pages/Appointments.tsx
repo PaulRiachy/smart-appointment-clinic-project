@@ -296,23 +296,23 @@ export default function Appointments() {
       : 'Cancel booking';
 
   return (
-    <main className="appointments-page">
-      <header className="appointments-page__header">
+    <main className="appointments-page management-page">
+      <header className="appointments-page__header management-header">
         <div>
-          <p className="appointments-page__eyebrow">
+          <p className="appointments-page__eyebrow management-eyebrow">
             Appointment management
           </p>
 
           <h1>Pending appointments</h1>
 
-          <p className="appointments-page__description">
+          <p className="appointments-page__description management-description">
             Review booking requests, sort them by appointment time,
             and confirm, reschedule or cancel each request.
           </p>
         </div>
 
         <button
-          className="appointments-button appointments-button--secondary"
+          className="appointments-button management-button appointments-button--secondary management-button--secondary"
           type="button"
           onClick={() => void loadAppointments()}
           disabled={isLoading}
@@ -322,7 +322,7 @@ export default function Appointments() {
       </header>
 
       <section
-        className="appointments-toolbar"
+        className="appointments-toolbar management-panel"
         aria-label="Appointment list controls"
       >
         <div>
@@ -386,7 +386,7 @@ export default function Appointments() {
         <div className="appointments-list">
           {pendingAppointments.map((appointment) => (
             <article
-              className="appointment-card"
+              className="appointment-card management-panel"
               key={appointment._id}
             >
               <div className="appointment-card__main">
@@ -424,14 +424,14 @@ export default function Appointments() {
               <div className="appointment-card__actions">
                 <button
                   type="button"
-                  className="appointments-button appointments-button--secondary"
+                  className="appointments-button management-button appointments-button--secondary management-button--secondary"
                   onClick={() => openAction(appointment, 'reschedule')}
                 >
                   Reschedule
                 </button>
                 <button
                   type="button"
-                  className="appointments-button appointments-button--primary"
+                  className="appointments-button management-button appointments-button--primary management-button--primary"
                   onClick={() =>
                     openAction(appointment, 'confirm')
                   }
@@ -441,7 +441,7 @@ export default function Appointments() {
 
                 <button
                   type="button"
-                  className="appointments-button appointments-button--danger"
+                  className="appointments-button management-button appointments-button--danger management-button--danger"
                   onClick={() =>
                     openAction(appointment, 'cancel')
                   }

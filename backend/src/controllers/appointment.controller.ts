@@ -1,9 +1,8 @@
 import type {
-  NextFunction,
   Request,
   Response,
 } from 'express';
-import mongoose, { Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 import {
   AppointmentStatus,
@@ -13,6 +12,7 @@ import {
 import { Appointment } from '../models/appointment.model';
 import { Service } from '../models/service.model';
 import { User }from '../models/user.model';
+import { businessDate } from '../utils/business-time';
 import {
   sendBookingConfirmationEmail,
   sendRescheduleEmail,
@@ -161,17 +161,13 @@ function parseStart(value: unknown): Date {
       input,
     )
   ) {
-    date = new Date(
-      `${input}:00+03:00`,
-    );
+    date = businessDate(input.slice(0, 10), `${input.slice(11)}:00`);
   } else if (
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(
       input,
     )
   ) {
-    date = new Date(
-      `${input}+03:00`,
-    );
+    date = businessDate(input.slice(0, 10), input.slice(11));
   } else {
     date = new Date(input);
   }
@@ -273,6 +269,30 @@ async function getAppointmentEmailDetails(appointmentId: string) {
     start: new Date(appointment.start),
     end: new Date(appointment.end),
   };
+}
+
+async function updateAppointmentOrThrow(
+  appointment: Awaited<ReturnType<typeof findAppointmentOrThrow>>,
+  changes: { status?: AppointmentStatus; start?: Date; end?: Date },
+) {
+  const updated = await Appointment.findOneAndUpdate(
+    {
+      _id: appointment._id,
+      status: appointment.status,
+      start: appointment.start,
+      end: appointment.end,
+      staff: appointment.staff,
+      service: appointment.service,
+    },
+    { $set: changes },
+    { new: true },
+  );
+
+  if (!updated) {
+    throw new HttpError(409, 'This appointment changed during the request. Please refresh and try again.');
+  }
+
+  return updated;
 }
 
 export async function getAvailabilityController(
@@ -589,10 +609,9 @@ export async function cancelAppointment(
       );
     }
 
-    appointment.status =
-      AppointmentStatus.CANCELLED;
-
-    await appointment.save();
+    const updated = await updateAppointmentOrThrow(appointment, {
+      status: AppointmentStatus.CANCELLED,
+    });
 
     const emailDetails =
       await getAppointmentEmailDetails(String(appointment._id));
@@ -604,7 +623,7 @@ export async function cancelAppointment(
     res.status(200).json({
       success: true,
       message: 'Appointment cancelled successfully.',
-      data: appointment,
+      data: updated,
     });
   } catch (error) {
     sendError(res, error);
@@ -713,15 +732,10 @@ export async function rescheduleAppointment(
               String(appointment._id),
             );
 
-          appointment.start =
-            validated.start;
-
-          appointment.end =
-            validated.end;
-
-          await appointment.save();
-
-          return appointment;
+          return updateAppointmentOrThrow(appointment, {
+            start: validated.start,
+            end: validated.end,
+          });
         },
       );
 
@@ -816,10 +830,10 @@ export async function confirmAppointment(
           String(appointment._id),
         );
 
-        appointment.status =
-          AppointmentStatus.CONFIRMED;
-
-        await appointment.save();
+        const updated = await updateAppointmentOrThrow(appointment, {
+          status: AppointmentStatus.CONFIRMED,
+        });
+        appointment.set(updated.toObject());
       },
     );
 
@@ -838,18 +852,5 @@ export async function confirmAppointment(
     });
   } catch (error) {
     sendError(res, error);
-  }
-}
-
-
-export async function getAppointmentController(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    await getAppointment(req, res);
-  } catch (error) {
-    next(error);
   }
 }

@@ -1,5 +1,6 @@
 //run using npx tsx backend/src/scripts/create-admin.ts
 import 'dotenv/config';
+import mongoose from 'mongoose';
 
 import { connectDB } from '../config/db';
 import { User } from '../models/user.model';
@@ -30,12 +31,11 @@ async function createAdmin(): Promise<void> {
 
     console.log('Admin created successfully.');
     console.log(`Email: ${admin.email}`);
-    console.log(`Password: ${admin.password}`);
   } catch (error) {
     console.error('Failed to create admin:', error);
     process.exitCode = 1;
   } finally {
-    process.exit(0);
+    await mongoose.disconnect();
   }
 }
 

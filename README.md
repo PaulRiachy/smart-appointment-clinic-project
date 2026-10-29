@@ -39,6 +39,7 @@ smart-appointment-clinic-project/
 |       `-- types/shared_types.ts         # Shared enums, interfaces, response type
 |-- backend/
 |   |-- package.json
+|   |-- tsconfig.json
 |   `-- src/
 |       |-- server.ts                    # Express and Socket.IO entry point
 |       |-- config/db.ts
@@ -47,6 +48,7 @@ smart-appointment-clinic-project/
 |       |-- models/
 |       |-- routes/
 |       |-- services/                    # Availability and SMTP mail
+|       |-- utils/business-time.ts       # Clinic timezone conversion
 |       |-- sockets/queue.socket.ts
 |       |-- jobs/noshow.cron.ts
 |       `-- scripts/create-admin.ts       # Development admin creation script
@@ -56,7 +58,7 @@ smart-appointment-clinic-project/
     |-- vite.config.ts
     |-- tsconfig.json
     `-- src/
-        |-- app.tsx                      # Routing and access guards; see casing note
+        |-- app.tsx                      # Routing and access guards
         |-- main.tsx
         |-- index.css                    # Theme, resets, shared text utilities
         |-- services/api.ts              # Axios and authentication storage keys
@@ -74,7 +76,6 @@ smart-appointment-clinic-project/
             |-- Dashboard.tsx
             |-- Services.tsx
             |-- StaffSchedule.tsx
-            |-- Home.tsx                 # Legacy welcome component; not routed
             `-- styles/                   # Page CSS, Auth, Customer, AppointmentSlots
 ```
 
@@ -86,7 +87,7 @@ smart-appointment-clinic-project/
 4. **No-shows:** The cron job runs every five minutes and updates only `CONFIRMED` appointments whose start is more than 15 minutes in the past. Checked-in and other statuses are excluded. The grace period is hardcoded in `backend/src/jobs/noshow.cron.ts`.
 5. **Revenue:** Estimated revenue sums the current service prices for completed appointments whose start falls within the selected range. Prices are not snapshotted at booking, so later service price changes can affect this estimate.
 6. **Open queue count:** The dashboard's `waitingNow` metric counts queue entries with a check-in time and no completion time. It includes currently serving entries and is not limited to today's date or the selected dashboard range.
-7. **Timezone:** Display formatting, queue day boundaries, and the cron job use `Asia/Beirut`. Availability timestamp construction, dashboard range boundaries, and offset-free appointment timestamps use a fixed `+03:00` offset. This can differ from the named timezone's seasonal offset; timezone handling is not consistently daylight-saving-aware throughout the backend.
+7. **Timezone:** Display formatting, availability timestamps, queue day boundaries, dashboard range boundaries, offset-free appointment timestamps, and the cron job use `Asia/Beirut`. The backend resolves date-specific offsets, including daylight-saving transitions; day boundaries use calendar dates rather than a fixed 24-hour duration.
 8. **Responses and storage:** API responses use `success` with optional `data`, `message`, and `error` fields. The Axios client stores authentication under `auth_token` and `auth_user`, adds Bearer tokens to requests, and clears authentication on HTTP 401 responses.
 
 ## API endpoints
@@ -227,9 +228,9 @@ Public registration creates customers only. Review and change the hardcoded acco
 npx tsx backend/src/scripts/create-admin.ts
 ```
 
-The helper reads the root `.env`. Its password log prints the stored password hash, not the original password. After signing in as an administrator, create services, staff accounts, and staff schedules before making customer bookings.
+The helper reads the root `.env` and does not log passwords. After signing in as an administrator, create services, staff accounts, and staff schedules before making customer bookings.
 
-## Build commands and current limitations
+## Build and regression checks
 
 The root exposes these build scripts:
 
@@ -240,9 +241,12 @@ npm run build:frontend
 npm run build
 ```
 
-`npm run build` runs all workspace builds in order. The current checkout has two confirmed blockers:
+`npm run build` compiles shared contracts and the backend, then type-checks and bundles the frontend. The backend's `start` script runs `backend/dist/server.js` after a successful build.
 
-- The backend build references `backend/tsconfig.json`, which is missing. `npm run build:backend` fails with TS5058. The backend's `start` script expects `backend/dist/server.js`, so it depends on a working backend build.
-- The frontend entry point imports `./app`, while the working-tree file is named `App.tsx` (Git records `app.tsx`). This casing mismatch causes TS1149 in the current checkout. The import and filesystem casing must agree for the frontend TypeScript build.
+Run the regression checks from the repository root:
 
-The standalone Vite bundling step succeeds in this checkout, but it does not replace the failing TypeScript build. There is no automated test-suite script in the workspace manifests.
+```bash
+npm test
+```
+
+This builds the shared and backend workspaces, then runs Node's test runner. Tests cover booking conflicts and lock cleanup, timezone boundaries, concurrent appointment updates, authentication, queue numbering, and frontend state/effect regressions. Database, SMTP, and frontend network access are mocked; these checks do not require a running clinic database and do not replace browser or live-database integration tests.

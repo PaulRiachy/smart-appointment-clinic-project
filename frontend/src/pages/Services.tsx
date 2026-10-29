@@ -209,26 +209,26 @@ export default function Services() {
   }
 
   return (
-    <main className="services-page">
-      <header className="services-header">
+    <main className="services-page management-page">
+      <header className="services-header management-header">
         <div>
-          <p className="services-eyebrow">Administration</p>
+          <p className="services-eyebrow management-eyebrow">Administration</p>
           <h1>Services</h1>
-          <p className="services-description">
+          <p className="services-description management-description">
             Create services, update prices and durations, and manage availability.
           </p>
         </div>
 
         <button
           type="button"
-          className="services-button services-button--primary"
+          className="services-button management-button services-button--primary management-button--primary"
           onClick={openCreateForm}
         >
           Add service
         </button>
       </header>
 
-      <section className="services-toolbar">
+      <section className="services-toolbar management-panel">
         <label className="services-search">
           <span className="sr-only">Search services</span>
           <input
@@ -250,7 +250,7 @@ export default function Services() {
 
         <button
           type="button"
-          className="services-button services-button--secondary"
+          className="services-button management-button services-button--secondary management-button--secondary"
           onClick={() => void loadServices()}
           disabled={isLoading}
         >
@@ -274,7 +274,7 @@ export default function Services() {
       ) : (
         <section className="services-grid">
           {filteredServices.map((service) => (
-            <article className="service-card" key={service._id}>
+            <article className="service-card management-panel" key={service._id}>
               <div className="service-card__header">
                 <div>
                   <h2>{service.name}</h2>
@@ -308,7 +308,7 @@ export default function Services() {
               <div className="service-card__actions">
                 <button
                   type="button"
-                  className="services-button services-button--secondary"
+                  className="services-button management-button services-button--secondary management-button--secondary"
                   onClick={() => openEditForm(service)}
                 >
                   Edit
@@ -316,10 +316,10 @@ export default function Services() {
 
                 <button
                   type="button"
-                  className={`services-button ${
+                  className={`services-button management-button ${
                     service.active
-                      ? 'services-button--danger'
-                      : 'services-button--primary'
+                      ? 'services-button--danger management-button--danger'
+                      : 'services-button--primary management-button--primary'
                   }`}
                   onClick={() => void toggleServiceStatus(service)}
                 >
@@ -439,7 +439,7 @@ export default function Services() {
               <footer className="services-modal__actions">
                 <button
                   type="button"
-                  className="services-button services-button--secondary"
+                  className="services-button management-button services-button--secondary management-button--secondary"
                   onClick={closeForm}
                   disabled={isSaving}
                 >
@@ -448,7 +448,7 @@ export default function Services() {
 
                 <button
                   type="submit"
-                  className="services-button services-button--primary"
+                  className="services-button management-button services-button--primary management-button--primary"
                   disabled={isSaving}
                 >
                   {isSaving ? 'Saving…' : 'Save service'}

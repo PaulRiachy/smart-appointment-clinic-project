@@ -17,6 +17,7 @@
     "frontend"
   ],
   "scripts": {
+    "test": "npm run build:shared && npm run build:backend && node --test tests/*.test.cjs",
     "build:shared": "npm run build --workspace=shared",
     "build:backend": "npm run build --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend",

@@ -153,6 +153,7 @@ export default function BookAppointment() {
     if (!serviceId) {
       setStaffOptions([]);
       setStaffId('');
+      setLoadingStaff(false);
       return;
     }
 
@@ -214,6 +215,8 @@ export default function BookAppointment() {
   useEffect(() => {
     if (!serviceId || !staffId || !selectedDate) {
       setSlots([]);
+      setSelectedSlot(null);
+      setLoadingSlots(false);
       return;
     }
 
@@ -223,6 +226,7 @@ export default function BookAppointment() {
       setLoadingSlots(true);
       setError('');
       setSelectedSlot(null);
+      setSlots([]);
 
       try {
         const response = await api.get('/appointments/availability', {
@@ -275,7 +279,8 @@ export default function BookAppointment() {
   };
 
   const confirmBooking = async () => {
-    if (!selectedService || !selectedStaff || !selectedSlot?.available) {
+    if (submitting) return;
+    if (!selectedService || !selectedStaff || !selectedSlot?.available || loadingSlots) {
       setError('Please choose a service, practitioner, and available slot.');
       return;
     }

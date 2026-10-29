@@ -8,6 +8,7 @@ import {
 } from '@app/shared';
 
 import api from '../services/api';
+import AP_Modal from '../components/AP_Modal';
 import './styles/StaffSchedule.css';
 
 const WEEKDAYS = [
@@ -62,6 +63,8 @@ export default function StaffSchedule() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
   const [isCreatingStaff, setIsCreatingStaff] = useState(false);
+  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+  const [staffFormError, setStaffFormError] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -115,7 +118,6 @@ export default function StaffSchedule() {
     }
 
     setError('');
-    setSuccess('');
     setSchedule(null);
     setIsLoadingSchedule(true);
 
@@ -269,7 +271,7 @@ export default function StaffSchedule() {
     if (isCreatingStaff) return;
 
     setIsCreatingStaff(true);
-    setError('');
+    setStaffFormError('');
     setSuccess('');
 
     try {
@@ -291,8 +293,9 @@ export default function StaffSchedule() {
         password: '',
       });
       setSuccess('Staff account created successfully.');
+      setIsStaffModalOpen(false);
     } catch (requestError: unknown) {
-      setError(
+      setStaffFormError(
         getErrorMessage(requestError, 'Unable to create the staff account.'),
       );
     } finally {
@@ -300,20 +303,37 @@ export default function StaffSchedule() {
     }
   }
 
+  function closeStaffModal() {
+    if (isCreatingStaff) return;
+    setIsStaffModalOpen(false);
+    setStaffFormError('');
+    setStaffForm({ fullName: '', email: '', phone: '', password: '' });
+  }
+
   const selectedStaff = staff.find(
     (member) => member._id === selectedStaffId,
   );
 
   return (
-    <main className="staff-schedule-page">
-      <header className="staff-schedule-header">
+    <main className="staff-schedule-page management-page">
+      <header className="staff-schedule-header management-header">
         <div>
-          <p className="staff-schedule-eyebrow">Administration</p>
+          <p className="staff-schedule-eyebrow management-eyebrow">Administration</p>
           <h1>Staff schedules</h1>
-          <p className="staff-schedule-description">
+          <p className="staff-schedule-description management-description">
             Manage staff accounts, working hours, days off, and service assignments.
           </p>
         </div>
+        <button
+          type="button"
+          className="staff-schedule-button management-button staff-schedule-button--primary management-button--primary"
+          onClick={() => {
+            setStaffFormError('');
+            setIsStaffModalOpen(true);
+          }}
+        >
+          Add staff
+        </button>
       </header>
 
       {error && (
@@ -328,89 +348,7 @@ export default function StaffSchedule() {
         </div>
       )}
 
-      <section className="staff-schedule-panel">
-        <h2>Create a staff account</h2>
-
-        <form
-          className="staff-create-form"
-          onSubmit={createStaff}
-        >
-          <label>
-            Full name
-            <input
-              required
-              value={staffForm.fullName}
-              onChange={(event) =>
-                setStaffForm((current) => ({
-                  ...current,
-                  fullName: event.target.value,
-                }))
-              }
-              placeholder="Staff member name"
-            />
-          </label>
-
-          <label>
-            Email address
-            <input
-              required
-              type="email"
-              value={staffForm.email}
-              onChange={(event) =>
-                setStaffForm((current) => ({
-                  ...current,
-                  email: event.target.value,
-                }))
-              }
-              placeholder="staff@example.com"
-            />
-          </label>
-
-          <label>
-            Phone number
-            <input
-              required
-              type="tel"
-              autoComplete="tel"
-              value={staffForm.phone}
-              onChange={(event) =>
-                setStaffForm((current) => ({
-                  ...current,
-                  phone: event.target.value,
-                }))
-              }
-              placeholder="+961 70 123 456"
-            />
-          </label>
-
-          <label>
-            Temporary password
-            <input
-              required
-              type="password"
-              minLength={8}
-              value={staffForm.password}
-              onChange={(event) =>
-                setStaffForm((current) => ({
-                  ...current,
-                  password: event.target.value,
-                }))
-              }
-              placeholder="At least 8 characters"
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="staff-schedule-button staff-schedule-button--primary"
-            disabled={isCreatingStaff}
-          >
-            {isCreatingStaff ? 'Creating…' : 'Create staff'}
-          </button>
-        </form>
-      </section>
-
-      <section className="staff-schedule-panel">
+      <section className="staff-schedule-panel management-panel">
         <div className="staff-schedule-section-header">
           <div>
             <h2>Configure working hours</h2>
@@ -419,7 +357,7 @@ export default function StaffSchedule() {
 
           <button
             type="button"
-            className="staff-schedule-button staff-schedule-button--secondary"
+            className="staff-schedule-button management-button staff-schedule-button--secondary management-button--secondary"
             onClick={() => void loadInitialData()}
             disabled={isLoading}
           >
@@ -433,6 +371,7 @@ export default function StaffSchedule() {
             value={selectedStaffId}
             onChange={(event) => {
               setSchedule(null);
+              setSuccess('');
               setSelectedStaffId(event.target.value);
             }}
             disabled={isLoading || isSaving || staff.length === 0}
@@ -466,7 +405,7 @@ export default function StaffSchedule() {
             No schedule data is available for {selectedStaff.fullName}.
             <button
               type="button"
-              className="staff-schedule-button staff-schedule-button--secondary"
+              className="staff-schedule-button management-button staff-schedule-button--secondary management-button--secondary"
               onClick={() => void loadSchedule()}
             >
               Try loading again
@@ -606,7 +545,7 @@ export default function StaffSchedule() {
             <footer className="staff-schedule-actions">
               <button
                 type="button"
-                className="staff-schedule-button staff-schedule-button--primary"
+                className="staff-schedule-button management-button staff-schedule-button--primary management-button--primary"
                 onClick={() => void saveSchedule()}
                 disabled={isSaving}
               >
@@ -616,6 +555,113 @@ export default function StaffSchedule() {
           </>
         )}
       </section>
+      {isStaffModalOpen && (
+        <AP_Modal
+          isOpen={isStaffModalOpen}
+          title="Create a staff account"
+          onClose={closeStaffModal}
+          closeOnBackdropClick={!isCreatingStaff}
+          className="staff-create-modal"
+        >
+          <p>Enter the new staff member's contact details and a temporary password.</p>
+          {staffFormError && (
+            <div className="staff-create-error" role="alert">{staffFormError}</div>
+          )}
+          <form
+            className="staff-create-form"
+            onSubmit={createStaff}
+          >
+            <fieldset className="staff-create-fields" disabled={isCreatingStaff}>
+              <label>
+                Full name
+                <input
+                  autoFocus
+                  autoComplete="name"
+                  required
+                  value={staffForm.fullName}
+                  onChange={(event) =>
+                    setStaffForm((current) => ({
+                      ...current,
+                      fullName: event.target.value,
+                    }))
+                  }
+                  placeholder="Staff member name"
+                />
+              </label>
+
+              <label>
+                Email address
+                <input
+                  required
+                  type="email"
+                  autoComplete="email"
+                  value={staffForm.email}
+                  onChange={(event) =>
+                    setStaffForm((current) => ({
+                      ...current,
+                      email: event.target.value,
+                    }))
+                  }
+                  placeholder="staff@example.com"
+                />
+              </label>
+
+              <label>
+                Phone number
+                <input
+                  required
+                  type="tel"
+                  autoComplete="tel"
+                  value={staffForm.phone}
+                  onChange={(event) =>
+                    setStaffForm((current) => ({
+                      ...current,
+                      phone: event.target.value,
+                    }))
+                  }
+                  placeholder="+961 70 123 456"
+                />
+              </label>
+
+              <label>
+                Temporary password
+                <input
+                  required
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={staffForm.password}
+                  onChange={(event) =>
+                    setStaffForm((current) => ({
+                      ...current,
+                      password: event.target.value,
+                    }))
+                  }
+                  placeholder="At least 8 characters"
+                />
+              </label>
+
+            </fieldset>
+            <div className="staff-create-actions">
+              <button
+                type="button"
+                className="staff-schedule-button management-button staff-schedule-button--secondary management-button--secondary"
+                onClick={closeStaffModal}
+                disabled={isCreatingStaff}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="staff-schedule-button management-button staff-schedule-button--primary management-button--primary"
+                disabled={isCreatingStaff}
+              >
+                {isCreatingStaff ? 'Creating…' : 'Create staff'}
+              </button>
+            </div>
+          </form>
+        </AP_Modal>
+      )}
     </main>
   );
 }

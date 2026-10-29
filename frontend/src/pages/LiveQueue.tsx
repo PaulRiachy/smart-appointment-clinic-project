@@ -175,19 +175,13 @@ export default function LiveQueue() {
     }
   }, []);
 
-  useQueueSocket({
-    onQueueUpdate: () => {
-        void loadQueue();
-    },
-});
-
   const handleQueueChange = useCallback(() => {
     void loadQueue();
   }, [loadQueue]);
 
   const { isConnected, lastUpdate } = useQueueSocket({
     onQueueUpdate: handleQueueChange,
-});
+  });
   useEffect(() => {
     void loadQueue();
   }, [loadQueue]);
@@ -282,38 +276,32 @@ export default function LiveQueue() {
   const activeUserName = user?.fullName ?? 'Staff member';
 
   return (
-    <main className="live-queue-page mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <main className="live-queue-page management-page">
+      <header className="management-header">
         <div>
-          <p className="text-sm text-slate-500">Staff operations</p>
+          <p className="management-eyebrow">Staff operations</p>
           <h1 className="text-3xl font-semibold tracking-tight">
             Live queue
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="management-description">
             Signed in as {activeUserName}. Times shown in Asia/Beirut.
           </p>
         </div>
 
         <div className="flex items-center gap-3 text-sm">
           <span
-            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 ${
-              isConnected
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-amber-50 text-amber-800'
+            className={`queue-connection ${
+              isConnected ? 'queue-connection--live' : 'queue-connection--offline'
             }`}
           >
-            <span
-              className={`h-2 w-2 rounded-full ${
-                isConnected ? 'bg-emerald-500' : 'bg-amber-500'
-              }`}
-            />
+            <span className="queue-connection__dot" aria-hidden="true" />
             {isConnected ? 'Live connection' : 'Reconnecting'}
           </span>
 
           <button
             type="button"
             onClick={() => void loadQueue()}
-            className="rounded-lg border border-slate-300 px-3 py-2 font-medium hover:bg-slate-50"
+            className="management-button"
           >
             Refresh
           </button>
@@ -338,7 +326,7 @@ export default function LiveQueue() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="management-panel">
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Check in a customer</h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -364,14 +352,14 @@ export default function LiveQueue() {
           <button
             type="submit"
             disabled={checkingIn || !reference.trim()}
-            className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="management-button management-button--primary"
           >
             {checkingIn ? 'Checking in…' : 'Check in'}
           </button>
         </form>
       </section>
 
-      <section className="space-y-4">
+      <section className="management-panel">
         <div className="flex items-end justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold">Currently serving</h2>
@@ -379,13 +367,13 @@ export default function LiveQueue() {
               Active services across all practitioners.
             </p>
           </div>
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700">
+          <span className="queue-count queue-count--serving">
             {servingEntries.length} in service
           </span>
         </div>
 
         {servingEntries.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+          <div className="queue-empty">
             No active services right now.
           </div>
         ) : (
@@ -424,7 +412,7 @@ export default function LiveQueue() {
                       type="button"
                       onClick={() => void handleQueueAction(entry, 'complete')}
                       disabled={actingOnId === entry._id}
-                      className="serving-table__complete"
+                      className="serving-table__complete management-button"
                       aria-label={`Complete service for ${customer ? getPersonName(customer) : 'Customer'}, queue ${entry.queueNumber}`}
                     >
                       {actingOnId === entry._id ? 'Updating…' : 'Complete service'}
@@ -439,7 +427,7 @@ export default function LiveQueue() {
         )}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="management-panel">
         <div className="flex flex-col gap-2 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold">Waiting room</h2>
@@ -447,7 +435,7 @@ export default function LiveQueue() {
               Ordered by check-in time, earliest first.
             </p>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+          <span className="queue-count">
             {waitingEntries.length} waiting
           </span>
         </div>
@@ -508,7 +496,7 @@ export default function LiveQueue() {
                           type="button"
                           onClick={() => void handleQueueAction(entry, 'call')}
                           disabled={actingOnId === entry._id}
-                          className="rounded-lg bg-indigo-600 px-3 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                          className="management-button management-button--primary"
                         >
                           {actingOnId === entry._id ? 'Calling…' : 'Call next'}
                         </button>

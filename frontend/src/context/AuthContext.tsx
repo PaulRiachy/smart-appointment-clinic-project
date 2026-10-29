@@ -86,7 +86,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const response = await api.get('/auth/me');
 
-        const authenticatedUser = response.data.data as IUser;
+        const authenticatedUser = response.data.data?.user as IUser | undefined;
 
         if (!authenticatedUser || !authenticatedUser._id) {
           throw new Error('Invalid authentication response.');

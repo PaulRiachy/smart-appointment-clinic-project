@@ -1,47 +1,8 @@
 /* StaffSchedule.css */
 
-.staff-schedule-page {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 32px;
-  color: #172033;
-}
-
-.staff-schedule-header {
-  margin-bottom: 28px;
-}
-
-.staff-schedule-eyebrow {
-  margin: 0;
-  color: #2563eb;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
-
-.staff-schedule-header h1 {
-  margin: 4px 0 8px;
-  color: #111827;
-  font-size: 30px;
-  font-weight: 750;
-  letter-spacing: -0.8px;
-}
-
-.staff-schedule-description {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
 .staff-schedule-panel {
   margin-bottom: 24px;
   padding: 26px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgb(15 23 42 / 4%);
 }
 
 .staff-schedule-panel > h2,
@@ -74,26 +35,31 @@
 }
 
 .staff-create-form {
+  margin-top: 20px;
+}
+
+.staff-create-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: end;
-  gap: 12px 16px;
+  gap: 18px 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.staff-create-form > label:nth-child(3) {
-  grid-column: auto;
+.staff-create-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e7f0;
 }
 
-.staff-create-form > .staff-schedule-button {
-  grid-column: 1 / -1;
-  justify-self: stretch;
-  width: 33%;
-  min-height: 46px;
-  margin-top: 2px;
-  justify-self: center;
-}
-
-.staff-create-form > label,
+.staff-create-fields > label,
 .staff-select {
   display: flex;
   flex-direction: column;
@@ -128,52 +94,6 @@
 .staff-select select:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgb(59 130 246 / 12%);
-}
-
-.staff-schedule-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 10px 17px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 650;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
-}
-
-.staff-schedule-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.staff-schedule-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.staff-schedule-button--primary {
-  color: #fff;
-  background: #2563eb;
-  border-color: #2563eb;
-}
-
-.staff-schedule-button--primary:hover:not(:disabled) {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-}
-
-.staff-schedule-button--secondary {
-  color: #334155;
-  background: #fff;
-  border-color: #cbd5e1;
-}
-
-.staff-schedule-button--secondary:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #94a3b8;
 }
 
 .staff-select {
@@ -400,54 +320,26 @@
 }
 
 @media (max-width: 1100px) {
-  .staff-create-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .staff-create-form .staff-schedule-button {
-    width: fit-content;
-  }
-
   .staff-weekly-schedule {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 700px) {
-  .staff-create-form {
+  .staff-create-fields {
     grid-template-columns: 1fr;
-    gap: 12px;
-    }
+  }
 
-    .staff-create-form > label:nth-child(3) {
-    grid-column: auto;
-    }
-
-    .staff-create-form > .staff-schedule-button {
-    grid-column: auto;
-    width: 100%;
-    }
-    }
+  .staff-schedule-section-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
 
 @media (max-width: 480px) {
-  .staff-schedule-page {
-    padding: 16px;
-  }
-
-  .staff-schedule-header h1 {
-    font-size: 26px;
-  }
 
   .staff-schedule-panel {
     padding: 16px;
-  }
-
-  .staff-create-form {
-    grid-template-columns: 1fr;
-  }
-
-  .staff-create-form .staff-schedule-button {
-    width: 100%;
   }
 
   .staff-day-card {

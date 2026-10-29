@@ -28,6 +28,13 @@ type Slot = {
 };
 
 type ModalMode = 'cancel' | 'reschedule' | null;
+type AppointmentGroup = 'upcoming' | 'pending' | 'past';
+
+const appointmentViews: { key: AppointmentGroup; label: string; emptyMessage: string }[] = [
+  { key: 'upcoming', label: 'Upcoming', emptyMessage: 'You have no upcoming appointments.' },
+  { key: 'pending', label: 'Pending', emptyMessage: 'You have no pending appointments.' },
+  { key: 'past', label: 'Past', emptyMessage: 'Your appointment history will appear here.' },
+];
 
 const statusLabels: Record<AppointmentStatus, string> = {
   [AppointmentStatus.PENDING]: 'PENDING',
@@ -122,6 +129,7 @@ export default function MyAppointments() {
   const { user } = useAuth();
 
   const [appointments, setAppointments] = useState<AppointmentView[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<AppointmentGroup>('upcoming');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -152,12 +160,20 @@ export default function MyAppointments() {
     void loadAppointments();
   }, [loadAppointments]);
 
-  const { upcoming, past } = useMemo(() => {
+  const { pending, upcoming, past } = useMemo(() => {
     const now = Date.now();
+
+    const pendingAppointments = appointments
+      .filter((appointment) => appointment.status === AppointmentStatus.PENDING)
+      .sort(
+        (a, b) =>
+          new Date(a.start).getTime() - new Date(b.start).getTime(),
+      );
 
     const future = appointments
       .filter(
         (appointment) =>
+          appointment.status !== AppointmentStatus.PENDING &&
           new Date(appointment.end).getTime() >= now &&
           appointment.status !== AppointmentStatus.CANCELLED &&
           appointment.status !== AppointmentStatus.COMPLETED &&
@@ -171,6 +187,7 @@ export default function MyAppointments() {
     const history = appointments
       .filter(
         (appointment) =>
+          appointment.status !== AppointmentStatus.PENDING &&
           !future.some((item) => item._id === appointment._id),
       )
       .sort(
@@ -178,8 +195,11 @@ export default function MyAppointments() {
           new Date(b.start).getTime() - new Date(a.start).getTime(),
       );
 
-    return { upcoming: future, past: history };
+    return { pending: pendingAppointments, upcoming: future, past: history };
   }, [appointments]);
+
+  const appointmentGroups = { upcoming, pending, past };
+  const visibleAppointments = appointmentGroups[selectedGroup];
 
   const closeModal = () => {
     if (saving) return;
@@ -264,7 +284,7 @@ export default function MyAppointments() {
   }, [modalMode, target, rescheduleDate]);
 
   const cancelAppointment = async () => {
-    if (!target) return;
+    if (!target || saving) return;
 
     setSaving(true);
     setError('');
@@ -280,7 +300,7 @@ export default function MyAppointments() {
       setAppointments((current) =>
         current.map((appointment) =>
           appointment._id === target._id
-            ? { ...appointment, ...updated }
+            ? { ...appointment, ...updated, service: appointment.service, staff: appointment.staff }
             : appointment,
         ),
       );
@@ -295,7 +315,7 @@ export default function MyAppointments() {
   };
 
   const rescheduleAppointment = async () => {
-    if (!target || !selectedSlot?.available) return;
+    if (!target || !selectedSlot?.available || saving || loadingSlots || slotsError) return;
 
     setSaving(true);
     setError('');
@@ -312,7 +332,7 @@ export default function MyAppointments() {
       setAppointments((current) =>
         current.map((appointment) =>
           appointment._id === target._id
-            ? { ...appointment, ...updated }
+            ? { ...appointment, ...updated, service: appointment.service, staff: appointment.staff }
             : appointment,
         ),
       );
@@ -423,10 +443,28 @@ export default function MyAppointments() {
         </div>
       )}
 
+      {!loading && (
+        <div className="appointment-view-bar" role="group" aria-label="Appointment views">
+          {appointmentViews.map(({ key, label }) => (
+            <button
+              key={key}
+              id={`appointment-view-${key}`}
+              type="button"
+              className="appointment-view-button"
+              aria-pressed={selectedGroup === key}
+              aria-controls="appointment-results"
+              onClick={() => setSelectedGroup(key)}
+            >
+              {label} <span>({appointmentGroups[key].length})</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <p role="status">Loading your appointments…</p>
       ) : appointments.length === 0 ? (
-        <section className="panel empty-state">
+        <section className="panel empty-state" id="appointment-results">
           <h2>No appointments yet</h2>
           <p>Book an appointment to see your reservation details here.</p>
           <button
@@ -438,33 +476,21 @@ export default function MyAppointments() {
         </button>
         </section>
       ) : (
-        <>
-          <section className="appointment-section">
-            <h2>Upcoming <span>({upcoming.length})</span></h2>
-            {upcoming.length === 0 ? (
-              <div className="panel">
-                <p>You have no upcoming appointments.</p>
-              </div>
-            ) : (
-              <div className="appointment-list">
-                {upcoming.map(renderAppointment)}
-              </div>
-            )}
-          </section>
-
-          <section className="appointment-section">
-            <h2>Past <span>({past.length})</span></h2>
-            {past.length === 0 ? (
-              <div className="panel">
-                <p>Your appointment history will appear here.</p>
-              </div>
-            ) : (
-              <div className="appointment-list">
-                {past.map(renderAppointment)}
-              </div>
-            )}
-          </section>
-        </>
+        <section
+          className="appointment-section"
+          id="appointment-results"
+          aria-labelledby={`appointment-view-${selectedGroup}`}
+        >
+          {visibleAppointments.length === 0 ? (
+            <div className="panel">
+              <p>{appointmentViews.find((view) => view.key === selectedGroup)?.emptyMessage}</p>
+            </div>
+          ) : (
+            <div className="appointment-list">
+              {visibleAppointments.map(renderAppointment)}
+            </div>
+          )}
+        </section>
       )}
 
       <AP_Modal

@@ -1,0 +1,229 @@
+/* Shared visual language for staff and administration pages. */
+
+main.management-page {
+  --management-border: #e1e7f0;
+  --management-muted: #667085;
+  --management-radius: 14px;
+  --management-shadow: 0 4px 18px rgb(24 39 75 / 4%);
+
+  width: 100%;
+  max-width: 1440px;
+  min-height: calc(100vh - 76px);
+  margin: 0 auto;
+  padding: 32px 32px 56px;
+  color: #172033;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.management-page > .management-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.management-header > div:first-child {
+  min-width: 0;
+}
+
+.management-header h1 {
+  margin: 4px 0 8px;
+  color: #172033;
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 750;
+  letter-spacing: -0.8px;
+  line-height: 1.25;
+}
+
+.management-header .management-eyebrow {
+  margin: 0;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 1.4px;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.management-header .management-description {
+  max-width: 720px;
+  margin: 0;
+  color: var(--management-muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.management-page .management-panel {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--management-border);
+  border-radius: var(--management-radius);
+  box-shadow: var(--management-shadow);
+}
+
+.management-page h2 {
+  color: #172033;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.35px;
+  line-height: 1.4;
+}
+
+.management-page :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  min-height: 42px;
+  padding: 10px 12px;
+  color: #172033;
+  background: #fff;
+  border: 1px solid #d5ddec;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.management-page :is(input, select, textarea):focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(49 87 213 / 12%);
+}
+
+.management-page :is(input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--primary);
+}
+
+.management-page .management-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  color: #344054;
+  background: #fff;
+  border: 1px solid #d5ddec;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.management-page .management-button:hover:not(:disabled) {
+  background: #f4f7fc;
+  border-color: #b9c6dc;
+}
+
+.management-page :is(.management-button--primary, .ap-modal-action--primary) {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.management-page :is(.management-button--primary, .ap-modal-action--primary):hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.management-page .management-button--danger {
+  color: #b42318;
+  background: #fff;
+  border-color: #fecaca;
+}
+
+.management-page .management-button--danger:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #f87171;
+}
+
+.management-page button:focus-visible {
+  outline: 3px solid rgb(49 87 213 / 24%);
+  outline-offset: 2px;
+}
+
+.management-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.management-page table {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.management-page table th {
+  color: var(--management-muted);
+  background: #f8faff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.management-page :is(.ap-modal-dialog, .services-modal) {
+  border-radius: 16px;
+  border-color: var(--management-border);
+}
+
+.management-page :is(.ap-modal-header, .services-modal__header) {
+  padding: 20px 24px;
+}
+
+.management-page .ap-modal-content {
+  padding: 24px;
+}
+
+.management-page > [role='alert'],
+.management-page .staff-create-error {
+  padding: 13px 16px;
+  margin-bottom: 20px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.management-page > [role='status'] {
+  padding: 13px 16px;
+  margin-bottom: 20px;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  main.management-page {
+    padding: 24px 16px 40px;
+  }
+
+  .management-page > .management-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .management-page :is(.ap-modal-header, .ap-modal-content, .services-modal__header) {
+    padding: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .management-page *,
+  .management-page *::before,
+  .management-page *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

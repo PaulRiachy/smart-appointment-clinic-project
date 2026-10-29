@@ -96,11 +96,12 @@ const errorHandler: ErrorRequestHandler = (
   error,
   _req,
   res,
-  _next,
+  next,
 ): void => {
   console.error('Unhandled server error:', error);
 
   if (res.headersSent) {
+    next(error);
     return;
   }
 

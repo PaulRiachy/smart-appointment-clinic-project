@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { AppointmentStatus } from '@app/shared';
 import { Appointment } from '../models/appointment.model';
 import { QueueEntry } from '../models/queue.model';
+import { businessDate, businessDayEnd } from '../utils/business-time';
 
 
 const BEIRUT_TIMEZONE = 'Asia/Beirut';
@@ -59,7 +60,7 @@ function parseDateOnly(value: string): Date | null {
     return null;
   }
 
-  const [year, month, day] = value.split('-').map(Number);
+  const [year = NaN, month = NaN, day = NaN] = value.split('-').map(Number);
 
   const date = new Date(
     Date.UTC(year, month - 1, day),
@@ -101,13 +102,8 @@ function createBeirutDay(
   });
 
 
-  const start = new Date(
-    `${date}T00:00:00+03:00`,
-  );
-
-  const end = new Date(
-    `${date}T23:59:59.999+03:00`,
-  );
+  const start = businessDate(date);
+  const end = new Date(businessDayEnd(date).getTime() - 1);
 
   return {
     date,
@@ -191,18 +187,6 @@ function getDashboardChartDays(
   );
 }
 
-function getDefaultDateRange(): {
-  startDate: string;
-  endDate: string;
-} {
-  const days = getLastSevenBeirutDays();
-
-  return {
-    startDate: days[0].date,
-    endDate: days[days.length - 1].date,
-  };
-}
-
 function resolveDateRange(
   requestedStartDate?: string,
   requestedEndDate?: string,
@@ -214,8 +198,8 @@ function resolveDateRange(
     const days = getLastSevenBeirutDays();
 
     return {
-      startDate: days[0].date,
-      endDate: days[days.length - 1].date,
+      startDate: days[0]!.date,
+      endDate: days[days.length - 1]!.date,
     };
   }
 
@@ -335,13 +319,8 @@ export async function getDashboardStats(
       return;
     }
 
-    const rangeStart = new Date(
-      `${dateRange.startDate}T00:00:00+03:00`,
-    );
-
-    const rangeEnd = new Date(
-      `${dateRange.endDate}T23:59:59.999+03:00`,
-    );
+    const rangeStart = businessDate(dateRange.startDate);
+    const rangeEnd = new Date(businessDayEnd(dateRange.endDate).getTime() - 1);
 
     const appointmentDateFilter = {
       start: {

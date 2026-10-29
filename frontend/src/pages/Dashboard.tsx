@@ -268,16 +268,16 @@ export default function Dashboard() {
   }, [dashboard]);
 
   return (
-    <main className="dashboard-page">
-      <header className="dashboard-header">
+    <main className="dashboard-page management-page">
+      <header className="dashboard-header management-header">
         <div>
-          <p className="dashboard-eyebrow">
+          <p className="dashboard-eyebrow management-eyebrow">
             Administration
           </p>
 
           <h1>Dashboard</h1>
 
-          <p className="dashboard-description">
+          <p className="dashboard-description management-description">
             Monitor appointment activity and
             business performance.
           </p>
@@ -285,7 +285,7 @@ export default function Dashboard() {
 
         <button
           type="button"
-          className="dashboard-refresh"
+          className="dashboard-refresh management-button"
           onClick={() => void loadStats()}
           disabled={isLoading}
         >
@@ -295,7 +295,7 @@ export default function Dashboard() {
         </button>
       </header>
 
-      <section className="dashboard-filters">
+      <section className="dashboard-filters management-panel">
         <label>
           Start date
 
@@ -354,7 +354,7 @@ export default function Dashboard() {
       ) : dashboard ? (
         <>
           <section className="dashboard-stat-grid">
-            <article className="dashboard-stat-card">
+            <article className="dashboard-stat-card management-panel">
               <span>
                 Total appointments
               </span>
@@ -367,7 +367,7 @@ export default function Dashboard() {
               </strong>
             </article>
 
-            <article className="dashboard-stat-card">
+            <article className="dashboard-stat-card management-panel">
               <span>Completed</span>
 
               <strong>
@@ -378,7 +378,7 @@ export default function Dashboard() {
               </strong>
             </article>
 
-            <article className="dashboard-stat-card">
+            <article className="dashboard-stat-card management-panel">
               <span>Cancelled</span>
 
               <strong>
@@ -389,7 +389,7 @@ export default function Dashboard() {
               </strong>
             </article>
 
-            <article className="dashboard-stat-card">
+            <article className="dashboard-stat-card management-panel">
               <span>Waiting now</span>
 
               <strong>
@@ -400,7 +400,7 @@ export default function Dashboard() {
               </strong>
             </article>
 
-            <article className="dashboard-stat-card dashboard-stat-card--revenue">
+            <article className="dashboard-stat-card management-panel dashboard-stat-card--revenue">
               <span>
                 Estimated revenue
               </span>
@@ -414,7 +414,7 @@ export default function Dashboard() {
             </article>
           </section>
 
-          <section className="dashboard-chart-card">
+          <section className="dashboard-chart-card management-panel">
             <div className="dashboard-section-heading">
               <div>
                 <h2>

@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { randomUUID } from 'node:crypto';
 
 import { AppointmentStatus, Weekday } from '@app/shared';
 
@@ -6,9 +7,12 @@ import { Appointment } from '../models/appointment.model';
 import { Service } from '../models/service.model';
 import { StaffSchedule } from '../models/schedule.model';
 import { User } from '../models/user.model';
+import {
+  BUSINESS_TIMEZONE,
+  businessDate,
+  businessDayEnd,
+} from '../utils/business-time';
 
-const BUSINESS_TIMEZONE = 'Asia/Beirut';
-const BUSINESS_OFFSET = '+03:00';
 const SLOT_STEP_MINUTES = 15;
 
 const BOOKING_STATUSES = [
@@ -104,7 +108,7 @@ function getWeekday(date: string): Weekday {
   const parsed = parseCalendarDate(date);
 
   const value = new Date(
-    `${date}T12:00:00${BUSINESS_OFFSET}`,
+    `${date}T12:00:00Z`,
   );
 
   const weekday = new Intl.DateTimeFormat('en-US', {
@@ -136,7 +140,7 @@ function minutesFromTime(value: string): number {
     throw new Error(`Invalid time "${value}". Expected HH:mm.`);
   }
 
-  const [hours, minutes] = value.split(':').map(Number);
+  const [hours = NaN, minutes = NaN] = value.split(':').map(Number);
 
   if (
     hours < 0 ||
@@ -167,9 +171,7 @@ function makeBusinessDate(
   parseCalendarDate(date);
   minutesFromTime(time);
 
-  return new Date(
-    `${date}T${time}:00${BUSINESS_OFFSET}`,
-  );
+  return businessDate(date, `${time}:00`);
 }
 
 function getBusinessDateKey(date: Date): string {
@@ -211,38 +213,6 @@ function normaliseInterval(
   };
 }
 
-function parseRequestedStart(
-  value: unknown,
-): Date {
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new Error('start is required.');
-  }
-
-  const trimmed = value.trim();
-
-  if (
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)
-  ) {
-    return new Date(`${trimmed}:00${BUSINESS_OFFSET}`);
-  }
-
-  if (
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(trimmed)
-  ) {
-    return new Date(`${trimmed}${BUSINESS_OFFSET}`);
-  }
-
-  const parsed = new Date(trimmed);
-
-  if (Number.isNaN(parsed.getTime())) {
-    throw new Error(
-      'start must be a valid ISO timestamp or YYYY-MM-DDTHH:mm.',
-    );
-  }
-
-  return parsed;
-}
-
 function sameDate(
   first: Date,
   second: Date,
@@ -251,20 +221,6 @@ function sameDate(
     getBusinessDateKey(first) ===
     getBusinessDateKey(second)
   );
-}
-
-function isSameOrAfter(
-  first: Date,
-  second: Date,
-): boolean {
-  return first.getTime() >= second.getTime();
-}
-
-function isBefore(
-  first: Date,
-  second: Date,
-): boolean {
-  return first.getTime() < second.getTime();
 }
 
 function overlaps(
@@ -359,7 +315,7 @@ async function getExistingAppointments(
   excludeAppointmentId?: string,
 ) {
   const dayStart = makeBusinessDate(date, '00:00');
-  const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+  const dayEnd = businessDayEnd(date);
 
   const query: Record<string, unknown> = {
     staff: staffId,
@@ -473,7 +429,7 @@ export async function getAvailability(
     }
 
     for (
-      let startMinutes = fromMinutes;
+      let startMinutes = Math.ceil(fromMinutes / SLOT_STEP_MINUTES) * SLOT_STEP_MINUTES;
       startMinutes <=
         toMinutes - context.service.duration;
       startMinutes += SLOT_STEP_MINUTES
@@ -481,11 +437,6 @@ export async function getAvailability(
       const endMinutes =
         startMinutes + context.service.duration;
 
-      // Defensive full-interval validation.
-      //
-      // The appointment must START at or after the staff's
-      // working start AND END at or before the staff's
-      // working end.
       if (
         startMinutes < fromMinutes ||
         endMinutes > toMinutes
@@ -554,6 +505,10 @@ export async function validateSlot(
 }> {
   if (Number.isNaN(start.getTime())) {
     throw new Error('Invalid appointment start time.');
+  }
+
+  if (start.getUTCSeconds() !== 0 || start.getUTCMilliseconds() !== 0) {
+    throw new Error('Appointment start time must use whole 15-minute increments.');
   }
 
   const context = await loadAvailabilityContext(
@@ -649,67 +604,6 @@ export async function validateSlot(
   };
 }
 
-//stops conflicting bookings
-async function withStaffBookingLock<T>(
-  staffId: string,
-  operation: () => Promise<T>,
-): Promise<T> {
-  const collection =
-    Appointment.db.collection(
-      'appointment_booking_locks',
-    );
-
-  const lockId = new Types.ObjectId(staffId);
-  const now = new Date();
-  const lockUntil = new Date(
-    now.getTime() + 30_000,
-  );
-
-  const lock = await collection.findOneAndUpdate(
-    {
-      _id: lockId,
-      $or: [
-        {
-          lockUntil: {
-            $lte: now,
-          },
-        },
-        {
-          lockUntil: {
-            $exists: false,
-          },
-        },
-      ],
-    },
-    {
-      $set: {
-        lockUntil,
-      },
-    },
-    {
-      upsert: true,
-      returnDocument: 'after',
-    },
-  );
-
-  if (!lock?.value) {
-    throw new Error(
-      'The selected staff member is currently being booked by another request. Please retry.',
-    );
-  }
-
-  try {
-    return await operation();
-  } finally {
-    await collection.deleteOne({
-      _id: lockId,
-    });
-  }
-}
-
-
-
-
 const BOOKING_LOCK_TTL_MS = 30_000;
 const BOOKING_SLOT_MINUTES = 15;
 const BOOKING_SLOT_MS =
@@ -720,6 +614,7 @@ interface BookingLockRecord {
   staffId: string;
   slotStart: Date;
   lockUntil: Date;
+  owner: string;
 }
 
 function getBookingLockKey(
@@ -735,7 +630,8 @@ function getBookingLockSlots(
 ): Date[] {
   const slots: Date[] = [];
 
-  let cursor = start.getTime();
+  // Requests for overlapping times must acquire the same slice keys.
+  let cursor = Math.floor(start.getTime() / BOOKING_SLOT_MS) * BOOKING_SLOT_MS;
   const endTime = end.getTime();
 
   while (cursor < endTime) {
@@ -787,7 +683,7 @@ export async function validateAndRunWithStaffLock<T>(
     );
   }
 
-  // Remove expired locks first. 
+  // Remove expired locks first.
 
   await collection.deleteMany({
     lockUntil: {
@@ -795,44 +691,44 @@ export async function validateAndRunWithStaffLock<T>(
     },
   });
 
-  const lockIds = slotStarts.map((slotStart) =>
-    getBookingLockKey(staffId, slotStart),
-  );
-
+  const owner = randomUUID();
+  const normalizedStaffId = new Types.ObjectId(staffId).toHexString();
   const locks: BookingLockRecord[] =
-    lockIds.map((lockId, index) => ({
-      _id: lockId,
-      staffId,
-      slotStart: slotStarts[index],
+    slotStarts.map((slotStart) => ({
+      _id: getBookingLockKey(normalizedStaffId, slotStart),
+      staffId: normalizedStaffId,
+      slotStart,
       lockUntil,
+      owner,
     }));
 
   try {
-    await collection.insertMany(
-      locks,
-      {
-        ordered: true,
-      },
-    );
-  } catch (error: any) {
-    // A duplicate _id means another request already owns at least one of these 15-minute booking slices.
-    if (error?.code === 11000) {
-      throw new Error(
-        'The selected appointment time is currently being booked by another request. Please choose another time.',
-      );
+    try {
+      await collection.insertMany(locks, { ordered: true });
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 11000
+      ) {
+        throw new Error(
+          'The selected appointment time is currently being booked by another request. Please choose another time.',
+        );
+      }
+
+      throw error;
     }
 
-    throw error;
-  }
-
-  try {
     return await operation();
   } finally {
+    // Ordered insertion may fail after acquiring some slices. Release only
+    // this request's locks, including when an expired lease was replaced.
     await collection.deleteMany({
       _id: {
-        $in: lockIds,
+        $in: locks.map((lock) => lock._id),
       },
-      staffId,
+      owner,
     });
   }
 }

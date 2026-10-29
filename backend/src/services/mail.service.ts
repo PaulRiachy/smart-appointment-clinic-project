@@ -69,10 +69,6 @@ function formatDateTime(value: Date): string {
   }).format(value);
 }
 
-export function formatBeirutDateTime(value: Date): string {
-  return formatDateTime(value);
-}
-
 async function sendEmail(details: {
   to: string;
   subject: string;

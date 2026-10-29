@@ -15,6 +15,7 @@ import Services from './pages/Services';
 import StaffSchedule from './pages/StaffSchedule';
 
 import AP_Navbar from './components/AP_Navbar';
+import './styles/Management.css';
 
 function LoadingScreen() {
   return (

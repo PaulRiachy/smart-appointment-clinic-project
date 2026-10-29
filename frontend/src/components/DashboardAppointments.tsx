@@ -137,7 +137,7 @@ export default function DashboardAppointments({ startDate, endDate }: Props) {
   const first = (currentPage - 1) * PAGE_SIZE;
 
   return (
-    <section className="dashboard-chart-card dashboard-appointments" aria-labelledby="dashboard-appointments-title">
+    <section className="dashboard-chart-card dashboard-appointments management-panel" aria-labelledby="dashboard-appointments-title">
       <div className="dashboard-section-heading">
         <div>
           <h2 id="dashboard-appointments-title">Appointments</h2>
@@ -176,7 +176,7 @@ export default function DashboardAppointments({ startDate, endDate }: Props) {
             <option value="latest">Latest first</option>
           </select>
         </label>
-        <button className="dashboard-table-button" type="button" onClick={() => {
+        <button className="dashboard-table-button management-button" type="button" onClick={() => {
           setSearch(''); setStatus(''); setStaffId(''); setServiceId(''); setSort('earliest'); setPage(1);
         }}>Clear filters</button>
       </div>
@@ -200,9 +200,9 @@ export default function DashboardAppointments({ startDate, endDate }: Props) {
             <nav className="dashboard-pagination" aria-label="Appointment pages">
               <span>Showing {first + 1}–{Math.min(first + PAGE_SIZE, filtered.length)} of {filtered.length}</span>
               <div>
-                <button className="dashboard-table-button" type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button>
+                <button className="dashboard-table-button management-button" type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button>
                 <span>Page {currentPage} of {pageCount}</span>
-                <button className="dashboard-table-button" type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>
+                <button className="dashboard-table-button management-button" type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>
               </div>
             </nav>
           )}

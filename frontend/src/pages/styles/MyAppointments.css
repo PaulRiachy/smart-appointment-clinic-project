@@ -1,5 +1,61 @@
 /* Appointment cards and history. */
 
+.customer-page .appointment-view-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  margin-bottom: 24px;
+  background: #f1f5fb;
+  border: 1px solid #e1e7f0;
+  border-radius: 14px;
+}
+
+.customer-page .appointment-view-button {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px;
+  color: #667085;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.customer-page .appointment-view-button:hover {
+  color: #2545b5;
+  background: #e9effa;
+}
+
+.customer-page .appointment-view-button[aria-pressed='true'] {
+  color: #2545b5;
+  background: #fff;
+  border-color: #dce5f4;
+  box-shadow: 0 2px 6px rgba(24, 39, 75, 0.06);
+}
+
+.customer-page .appointment-view-button:focus-visible {
+  outline: 2px solid #3157d5;
+  outline-offset: 2px;
+}
+
+.customer-page .appointment-view-button span {
+  padding: 3px 7px;
+  background: #edf2ff;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .customer-page .appointment-section {
   margin-bottom: 36px;
 }

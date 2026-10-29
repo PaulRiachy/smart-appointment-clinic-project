@@ -1,5 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
+import { User } from '../models/user.model';
 
 import { UserRole, ApiResponse } from '@app/shared';
 
@@ -43,7 +45,7 @@ function extractToken(socket: Socket): string | null {
   return null;
 }
 
-function authenticateSocket(socket: Socket): JwtPayload {
+async function authenticateSocket(socket: Socket): Promise<JwtPayload> {
   const token = extractToken(socket);
 
   if (!token) {
@@ -56,12 +58,17 @@ function authenticateSocket(socket: Socket): JwtPayload {
     typeof decoded !== 'object' ||
     decoded === null ||
     typeof decoded.sub !== 'string' ||
+    !Types.ObjectId.isValid(decoded.sub) ||
     !Object.values(UserRole).includes(decoded.role as UserRole)
   ) {
     throw new Error('Invalid authentication token');
   }
 
-  const payload = decoded as JwtPayload;
+  const account = await User.findById(decoded.sub).select('_id role').lean();
+
+  if (!account) throw new Error('User account is unavailable');
+
+  const payload: JwtPayload = { sub: String(account._id), role: account.role };
 
   if (
     payload.role !== UserRole.ADMIN &&
@@ -74,9 +81,9 @@ function authenticateSocket(socket: Socket): JwtPayload {
 }
 
 export function initQueueSocket(io: Server): void {
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     try {
-      const user = authenticateSocket(socket);
+      const user = await authenticateSocket(socket);
 
       socket.data.userId = user.sub;
       socket.data.role = user.role;

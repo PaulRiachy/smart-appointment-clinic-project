@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
+import { Types } from 'mongoose';
 import { UserRole } from '@app/shared';
 import { User } from '../models/user.model';
 
@@ -54,6 +55,7 @@ export async function authenticate(
     if (
       typeof decoded === 'string' ||
       typeof decoded.sub !== 'string' ||
+      !Types.ObjectId.isValid(decoded.sub) ||
       !validRoles.includes(decoded.role as UserRole)
     ) {
       res.status(401).json({
@@ -83,11 +85,15 @@ export async function authenticate(
     };
 
     next();
-  } catch {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid or expired authentication token.',
-    });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid or expired authentication token.',
+      });
+      return;
+    }
+    next(error);
   }
 }
 

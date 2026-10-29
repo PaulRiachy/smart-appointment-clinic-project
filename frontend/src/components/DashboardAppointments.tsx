@@ -143,7 +143,7 @@ export default function DashboardAppointments({ startDate, endDate }: Props) {
           <h2 id="dashboard-appointments-title">Appointments</h2>
           <p>All bookings in the date range above, including cancelled and completed appointments. Times are shown in Asia/Beirut.</p>
         </div>
-        <button className="dashboard-refresh" type="button" disabled={isLoading} onClick={() => void loadAppointments()}>
+        <button className="dashboard-refresh management-button" type="button" disabled={isLoading} onClick={() => void loadAppointments()}>
           {isLoading ? 'Loading…' : 'Refresh appointments'}
         </button>
       </div>

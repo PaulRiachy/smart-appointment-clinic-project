@@ -51,7 +51,7 @@
 
 .appointment-card__main {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 24px;
   min-width: 0;
 }
@@ -92,11 +92,18 @@
   font-size: 0.82rem;
 }
 
-.appointment-card__actions {
-  display: flex;
-  flex-wrap: wrap;
+.appointments-page .appointment-card__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   flex-shrink: 0;
-  gap: 9px;
+  width: 360px;
+  gap: 8px;
+}
+
+.appointments-page .appointment-card__actions > button {
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .appointments-state {
@@ -205,6 +212,18 @@
   gap: 9px;
 }
 
+@media (max-width: 1024px) {
+  .appointments-page .appointment-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .appointments-page .appointment-card__actions {
+    align-self: flex-end;
+    width: min(100%, 360px);
+  }
+}
+
 @media (max-width: 760px) {
 
   .appointments-toolbar {
@@ -240,8 +259,12 @@
     gap: 14px;
   }
 
-  .appointment-card__actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .appointments-page .appointment-card__actions {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .appointments-page .appointment-card__actions > .management-button--primary {
+    grid-column: 1 / -1;
   }
 }

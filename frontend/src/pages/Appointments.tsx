@@ -10,6 +10,7 @@ import {
 import api from '../services/api';
 import AP_Modal from '../components/AP_Modal';
 import AP_DatePicker from '../components/AP_DatePicker';
+import './styles/AppointmentSlots.css';
 import './styles/Appointments.css';
 
 type SortOrder = 'earliest' | 'latest';
@@ -431,22 +432,22 @@ export default function Appointments() {
                 </button>
                 <button
                   type="button"
-                  className="appointments-button management-button appointments-button--primary management-button--primary"
-                  onClick={() =>
-                    openAction(appointment, 'confirm')
-                  }
-                >
-                  Confirm
-                </button>
-
-                <button
-                  type="button"
                   className="appointments-button management-button appointments-button--danger management-button--danger"
                   onClick={() =>
                     openAction(appointment, 'cancel')
                   }
                 >
                   Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="appointments-button management-button appointments-button--primary management-button--primary"
+                  onClick={() =>
+                    openAction(appointment, 'confirm')
+                  }
+                >
+                  Confirm
                 </button>
               </div>
             </article>
@@ -543,12 +544,12 @@ export default function Appointments() {
               ) : slots.length === 0 ? (
                 <p>No available times for this date. Try another date.</p>
               ) : (
-                <div className="appointment-reschedule__slots" aria-label="Available times">
+                <div className="slot-grid appointment-reschedule__slots" aria-label="Available times">
                   {slots.map((slot) => (
                     <button
                       key={slot.start}
                       type="button"
-                      className={`appointments-button appointments-button--${selectedSlot?.start === slot.start ? 'primary' : 'secondary'}`}
+                      className={`slot${selectedSlot?.start === slot.start ? ' selected' : ''}`}
                       disabled={isSaving}
                       aria-pressed={selectedSlot?.start === slot.start}
                       onClick={() => setSelectedSlot(slot)}

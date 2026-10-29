@@ -240,6 +240,12 @@
   margin-top: 26px;
 }
 
+.dashboard-appointments .dashboard-section-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
 .dashboard-appointment-filters {
   padding: 0 0 20px;
   border: 0;
@@ -411,8 +417,8 @@
 
 @media (max-width: 560px) {
   .dashboard-appointments .dashboard-section-heading {
-    align-items: flex-start;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
   }
 
   .dashboard-appointment-filters label,

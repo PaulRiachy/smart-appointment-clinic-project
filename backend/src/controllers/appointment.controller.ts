@@ -182,7 +182,21 @@ function parseStart(value: unknown): Date {
   return date;
 }
 
-function canManageAllAppointments(
+const STAFF_VISIBLE_APPOINTMENT_STATUSES: AppointmentStatus[] = [
+  AppointmentStatus.PENDING,
+  AppointmentStatus.CONFIRMED,
+];
+
+function ensureStaffCanAccessAppointment(
+  appointment: { status: AppointmentStatus },
+  role: string,
+): void {
+  if (role === UserRole.STAFF && !STAFF_VISIBLE_APPOINTMENT_STATUSES.includes(appointment.status)) {
+    throw new HttpError(403, 'Staff can only access pending and confirmed appointments.');
+  }
+}
+
+function canManageAppointments(
   role: string,
 ): boolean {
   return (
@@ -479,8 +493,10 @@ export async function listAppointments(
     if (role === UserRole.CUSTOMER) {
       query.customer =
         new Types.ObjectId(userId);
+    } else if (role === UserRole.STAFF) {
+      query.status = { $in: STAFF_VISIBLE_APPOINTMENT_STATUSES };
     } else if (
-      !canManageAllAppointments(role)
+      !canManageAppointments(role)
     ) {
       throw new HttpError(
         403,
@@ -534,13 +550,15 @@ export async function getAppointment(
         userId,
       );
     } else if (
-      !canManageAllAppointments(role)
+      !canManageAppointments(role)
     ) {
       throw new HttpError(
         403,
         'You are not allowed to view this appointment.',
       );
     }
+
+    ensureStaffCanAccessAppointment(appointment, role);
 
     await appointment.populate([
       {
@@ -588,13 +606,15 @@ export async function cancelAppointment(
         userId,
       );
     } else if (
-      !canManageAllAppointments(role)
+      !canManageAppointments(role)
     ) {
       throw new HttpError(
         403,
         'You are not allowed to cancel this appointment.',
       );
     }
+
+    ensureStaffCanAccessAppointment(appointment, role);
 
     if (
       [
@@ -652,13 +672,15 @@ export async function rescheduleAppointment(
         userId,
       );
     } else if (
-      !canManageAllAppointments(role)
+      !canManageAppointments(role)
     ) {
       throw new HttpError(
         403,
         'You are not allowed to reschedule this appointment.',
       );
     }
+
+    ensureStaffCanAccessAppointment(appointment, role);
 
     if (
       [
@@ -769,7 +791,7 @@ export async function confirmAppointment(
       role,
     } = getAuthenticatedUser(req);
 
-    if (!canManageAllAppointments(role)) {
+    if (!canManageAppointments(role)) {
       throw new HttpError(
         403,
         'Only staff or administrators can confirm appointments.',
@@ -780,6 +802,8 @@ export async function confirmAppointment(
       await findAppointmentOrThrow(
         String(req.params.id),
       );
+
+    ensureStaffCanAccessAppointment(appointment, role);
 
     if (
       appointment.status !==

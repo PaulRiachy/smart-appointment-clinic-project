@@ -6,7 +6,7 @@ A MERN monorepo for clinic appointments, staff schedules, customer bookings, and
 
 - **Authentication and roles:** JWT authentication with `CUSTOMER`, `STAFF`, and `ADMIN` access controls.
 - **Customer bookings:** Select a service, practitioner, date, and available time; view, cancel, or reschedule bookings with the same practitioner.
-- **Appointment management:** Staff can review pending bookings, confirm them, reschedule them, or cancel them.
+- **Appointment management:** Staff and administrators can switch between pending and confirmed bookings, confirm pending requests, and reschedule or cancel either group. Administrators can find other statuses in the dashboard.
 - **Staff schedules:** Administrators can create staff accounts and configure weekly working intervals, days off, and assigned services. Staff without a schedule can be configured from an empty schedule form.
 - **Live queue:** Check in confirmed appointments, view compact currently-serving rows and a waiting-room table, call a customer, and complete a service. Daily queue numbers start at `A-001`.
 - **Queue updates:** Socket.IO events `queue:update`, `queue:call`, and `queue:complete` are sent to authenticated staff/admin connections.
@@ -92,7 +92,7 @@ smart-appointment-clinic-project/
 
 ## API endpoints
 
-Protected HTTP endpoints expect `Authorization: Bearer <token>`. Customers can access and manage only their own appointments; staff and administrators can access all appointments.
+Protected HTTP endpoints expect `Authorization: Bearer <token>`. Customers can access and manage only their own appointments. Staff appointment endpoints permit pending and confirmed bookings only; administrators can access all statuses. Queue operations use their dedicated staff/admin permissions.
 
 ### Authentication
 

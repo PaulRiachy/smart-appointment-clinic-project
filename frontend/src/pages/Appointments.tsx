@@ -15,6 +15,12 @@ import './styles/Appointments.css';
 
 type SortOrder = 'earliest' | 'latest';
 type AppointmentAction = 'confirm' | 'cancel' | 'reschedule';
+type BookingStatus = AppointmentStatus.PENDING | AppointmentStatus.CONFIRMED;
+
+const bookingViews: { status: BookingStatus; label: string }[] = [
+  { status: AppointmentStatus.PENDING, label: 'Pending' },
+  { status: AppointmentStatus.CONFIRMED, label: 'Confirmed' },
+];
 
 type AvailableSlot = { start: string; end: string };
 
@@ -99,6 +105,7 @@ export default function Appointments() {
   const [actionError, setActionError] = useState('');
 
   const [sortOrder, setSortOrder] = useState<SortOrder>('earliest');
+  const [selectedStatus, setSelectedStatus] = useState<BookingStatus>(AppointmentStatus.PENDING);
   const [selectedAppointment, setSelectedAppointment] =
     useState<IAppointment | null>(null);
   const [pendingAction, setPendingAction] =
@@ -174,11 +181,16 @@ export default function Appointments() {
     return () => { cancelled = true; };
   }, [pendingAction, selectedAppointment, rescheduleDate]);
 
-  const pendingAppointments = useMemo(() => {
+  const bookingCounts = useMemo(() => ({
+    [AppointmentStatus.PENDING]: appointments.filter((appointment) => appointment.status === AppointmentStatus.PENDING).length,
+    [AppointmentStatus.CONFIRMED]: appointments.filter((appointment) => appointment.status === AppointmentStatus.CONFIRMED).length,
+  }), [appointments]);
+
+  const visibleAppointments = useMemo(() => {
     return appointments
       .filter(
         (appointment) =>
-          appointment.status === AppointmentStatus.PENDING,
+          appointment.status === selectedStatus,
       )
       .sort((first, second) => {
         const firstTime = new Date(first.start).getTime();
@@ -188,7 +200,7 @@ export default function Appointments() {
           ? firstTime - secondTime
           : secondTime - firstTime;
       });
-  }, [appointments, sortOrder]);
+  }, [appointments, sortOrder, selectedStatus]);
 
   function openAction(
     appointment: IAppointment,
@@ -304,11 +316,11 @@ export default function Appointments() {
             Appointment management
           </p>
 
-          <h1>Pending appointments</h1>
+          <h1>Appointments</h1>
 
           <p className="appointments-page__description management-description">
-            Review booking requests, sort them by appointment time,
-            and confirm, reschedule or cancel each request.
+            Review pending and confirmed bookings. Confirm pending requests,
+            or reschedule and cancel appointments.
           </p>
         </div>
 
@@ -326,16 +338,19 @@ export default function Appointments() {
         className="appointments-toolbar management-panel"
         aria-label="Appointment list controls"
       >
-        <div>
-          <span className="appointments-toolbar__count">
-            {pendingAppointments.length}
-          </span>
-
-          <span className="appointments-toolbar__label">
-            {pendingAppointments.length === 1
-              ? 'pending request'
-              : 'pending requests'}
-          </span>
+        <div className="appointments-status-switch" role="group" aria-label="Booking status">
+          {bookingViews.map(({ status, label }) => (
+            <button
+              key={status}
+              type="button"
+              className="appointments-status-button"
+              aria-pressed={selectedStatus === status}
+              disabled={isLoading}
+              onClick={() => setSelectedStatus(status)}
+            >
+              {label} <span>({bookingCounts[status]})</span>
+            </button>
+          ))}
         </div>
 
         <label className="appointments-sort">
@@ -370,7 +385,7 @@ export default function Appointments() {
         <div className="appointments-state">
           Loading appointments…
         </div>
-      ) : !pageError && pendingAppointments.length === 0 ? (
+      ) : !pageError && visibleAppointments.length === 0 ? (
         <div className="appointments-state appointments-state--empty">
           <span
             className="appointments-state__icon"
@@ -379,13 +394,15 @@ export default function Appointments() {
             ✓
           </span>
 
-          <h2>All caught up</h2>
+          <h2>{selectedStatus === AppointmentStatus.PENDING ? 'All caught up' : 'No confirmed appointments'}</h2>
 
-          <p>There are no pending appointment requests right now.</p>
+          <p>{selectedStatus === AppointmentStatus.PENDING
+            ? 'There are no pending appointment requests right now.'
+            : 'Confirmed bookings will appear here once requests are approved.'}</p>
         </div>
       ) : !pageError ? (
         <div className="appointments-list">
-          {pendingAppointments.map((appointment) => (
+          {visibleAppointments.map((appointment) => (
             <article
               className="appointment-card management-panel"
               key={appointment._id}
@@ -422,7 +439,7 @@ export default function Appointments() {
                 </div>
               </div>
 
-              <div className="appointment-card__actions">
+              <div className={`appointment-card__actions${appointment.status === AppointmentStatus.CONFIRMED ? ' appointment-card__actions--confirmed' : ''}`}>
                 <button
                   type="button"
                   className="appointments-button management-button appointments-button--secondary management-button--secondary"
@@ -440,15 +457,17 @@ export default function Appointments() {
                   Cancel
                 </button>
 
-                <button
-                  type="button"
-                  className="appointments-button management-button appointments-button--primary management-button--primary"
-                  onClick={() =>
-                    openAction(appointment, 'confirm')
-                  }
-                >
-                  Confirm
-                </button>
+                {appointment.status === AppointmentStatus.PENDING && (
+                  <button
+                    type="button"
+                    className="appointments-button management-button appointments-button--primary management-button--primary"
+                    onClick={() =>
+                      openAction(appointment, 'confirm')
+                    }
+                  >
+                    Confirm
+                  </button>
+                )}
               </div>
             </article>
           ))}
@@ -484,7 +503,7 @@ export default function Appointments() {
               ? `Choose an available time with ${getPersonName(selectedAppointment?.staff)}.`
               : pendingAction === 'confirm'
               ? 'Confirm this booking? The appointment will be marked as confirmed.'
-              : 'Cancel this booking? The pending appointment will be marked as cancelled.'}
+              : 'Cancel this booking? The appointment will be marked as cancelled.'}
           </p>
 
           {selectedAppointment && (

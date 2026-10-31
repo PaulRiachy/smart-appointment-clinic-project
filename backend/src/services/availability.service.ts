@@ -722,8 +722,6 @@ export async function validateAndRunWithStaffLock<T>(
 
     return await operation();
   } finally {
-    // Ordered insertion may fail after acquiring some slices. Release only
-    // this request's locks, including when an expired lease was replaced.
     await collection.deleteMany({
       _id: {
         $in: locks.map((lock) => lock._id),

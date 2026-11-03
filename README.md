@@ -40,18 +40,13 @@ smart-appointment-clinic-project/
 |-- backend/
 |   |-- package.json
 |   |-- tsconfig.json
+|   |-- DDD.md                           # Short guide to the backend layers
 |   `-- src/
-|       |-- server.ts                    # Express and Socket.IO entry point
-|       |-- config/db.ts
-|       |-- controllers/
-|       |-- middleware/
-|       |-- models/
-|       |-- routes/
-|       |-- services/                    # Availability and SMTP mail
-|       |-- utils/business-time.ts       # Clinic timezone conversion
-|       |-- sockets/queue.socket.ts
-|       |-- jobs/noshow.cron.ts
-|       `-- scripts/create-admin.ts       # Development admin creation script
+|       |-- server.ts                    # Composition, startup and shutdown
+|       |-- domain/                      # Entities, business rules, clinic time
+|       |-- application/                 # Use cases and persistence/integration ports
+|       |-- infrastructure/              # Mongoose repositories, JWT, SMTP, locks, sockets, cron
+|       `-- presentation/                # HTTP controllers, routes and middleware
 `-- frontend/
     |-- package.json
     |-- .env.example
@@ -79,12 +74,27 @@ smart-appointment-clinic-project/
             `-- styles/                   # Page CSS, Auth, Customer, AppointmentSlots
 ```
 
+## Backend architecture: Domain-Driven Design (DDD)
+
+The backend uses four layers to separate clinic business rules, application workflows, HTTP handling, and technical integrations. It runs as a single application, with dependencies connected in `backend/src/server.ts`.
+
+| Layer             | Responsibility                                                                             | Project examples                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `domain/`         | Framework-independent entities, business rules, and calculations.                          | Appointment policies, overlap checks, working intervals, queue numbering, and Beirut timezone handling. |
+| `application/`    | Use cases that coordinate domain rules, persistence, and notifications through interfaces. | Booking and rescheduling appointments, authentication, queue operations, and dashboard retrieval.       |
+| `infrastructure/` | Database access and implementations of external integrations.                              | Mongoose models/repositories, MongoDB booking locks, JWT, SMTP, Socket.IO, and cron scheduling.         |
+| `presentation/`   | Express routes, thin controllers, middleware, and HTTP response/error mapping.             | Reading request data, invoking use cases, and returning API responses.                                  |
+
+For example, a booking request enters through Presentation, which calls an Application use case. The use case applies Domain rules and accesses persistence through interfaces implemented by Infrastructure. Presentation then returns the HTTP response.
+
+Domain has no dependency on the other layers. Application depends on Domain and framework-independent interfaces; Infrastructure implements those interfaces, and Presentation invokes the use cases. `server.ts` wires the implementations together without a dependency injection framework.
+
 ## Business rules and implementation details
 
 1. **Availability and booking:** A service must be active and assigned to the selected staff member. The appointment must fit inside their working hours and avoid days off and overlapping appointments. `PENDING`, `CONFIRMED`, `CHECKED_IN`, and `IN_SERVICE` appointments block availability. Booking validation requires starts in 15-minute increments. Adjacent appointment boundaries are allowed.
 2. **Booking locks:** Creation, confirmation, and rescheduling use short-lived MongoDB lock records for 15-minute slices of the requested staff time, then validate availability before saving. These application-level checks and locks are not a MongoDB transaction or a database-level exclusion constraint for every possible overlapping interval.
 3. **Rescheduling:** The endpoint accepts a new `start` timestamp and retains the appointment's service, practitioner, reference, and status. Completed, cancelled, and no-show appointments cannot be rescheduled.
-4. **No-shows:** The cron job runs every five minutes and updates only `CONFIRMED` appointments whose start is more than 15 minutes in the past. Checked-in and other statuses are excluded. The grace period is hardcoded in `backend/src/jobs/noshow.cron.ts`.
+4. **No-shows:** The cron job runs every five minutes and updates only `CONFIRMED` appointments whose start is more than 15 minutes in the past. Checked-in and other statuses are excluded. The grace period is defined in `backend/src/domain/appointments/appointment.rules.ts`; scheduling lives in `backend/src/infrastructure/jobs/noshow.cron.ts`.
 5. **Revenue:** Estimated revenue sums the current service prices for completed appointments whose start falls within the selected range. Prices are not snapshotted at booking, so later service price changes can affect this estimate.
 6. **Open queue count:** The dashboard's `waitingNow` metric counts queue entries with a check-in time and no completion time. It includes currently serving entries and is not limited to today's date or the selected dashboard range.
 7. **Timezone:** Display formatting, availability timestamps, queue day boundaries, dashboard range boundaries, offset-free appointment timestamps, and the cron job use `Asia/Beirut`. The backend resolves date-specific offsets, including daylight-saving transitions; day boundaries use calendar dates rather than a fixed 24-hour duration.
@@ -96,61 +106,61 @@ Protected HTTP endpoints expect `Authorization: Bearer <token>`. Customers can a
 
 ### Authentication
 
-| Method | Endpoint | Access | Description |
-| --- | --- | --- | --- |
-| POST | `/api/auth/register` | Public | Register a customer; role is always `CUSTOMER` |
-| POST | `/api/auth/login` | Public | Authenticate and issue a JWT |
-| GET | `/api/auth/me` | Authenticated | Retrieve the current user |
+| Method | Endpoint             | Access        | Description                                    |
+| ------ | -------------------- | ------------- | ---------------------------------------------- |
+| POST   | `/api/auth/register` | Public        | Register a customer; role is always `CUSTOMER` |
+| POST   | `/api/auth/login`    | Public        | Authenticate and issue a JWT                   |
+| GET    | `/api/auth/me`       | Authenticated | Retrieve the current user                      |
 
 ### Services
 
-| Method | Endpoint | Access | Description |
-| --- | --- | --- | --- |
-| GET | `/api/services` | Public | Active services; authenticated admins see inactive services too |
-| POST | `/api/services` | Admin | Create a service |
-| PUT | `/api/services/:id` | Admin | Update service details |
-| PATCH | `/api/services/:id/status` | Admin | Set `active` if supplied, otherwise toggle it |
+| Method | Endpoint                   | Access | Description                                                     |
+| ------ | -------------------------- | ------ | --------------------------------------------------------------- |
+| GET    | `/api/services`            | Public | Active services; authenticated admins see inactive services too |
+| POST   | `/api/services`            | Admin  | Create a service                                                |
+| PUT    | `/api/services/:id`        | Admin  | Update service details                                          |
+| PATCH  | `/api/services/:id/status` | Admin  | Set `active` if supplied, otherwise toggle it                   |
 
 ### Staff and schedules
 
-| Method | Endpoint | Access | Description |
-| --- | --- | --- | --- |
-| GET | `/api/users/staff` | Authenticated | List staff members, including for customer booking selection |
-| POST | `/api/users/staff` | Admin | Create a staff account |
-| GET | `/api/staff/:id/schedule` | Authenticated | Fetch a schedule; unconfigured staff return `data: { staff, schedule: null }` |
-| PUT | `/api/staff/:id/schedule` | Admin | Create or update weekly hours, days off, and service assignments |
+| Method | Endpoint                  | Access        | Description                                                                   |
+| ------ | ------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| GET    | `/api/users/staff`        | Authenticated | List staff members, including for customer booking selection                  |
+| POST   | `/api/users/staff`        | Admin         | Create a staff account                                                        |
+| GET    | `/api/staff/:id/schedule` | Authenticated | Fetch a schedule; unconfigured staff return `data: { staff, schedule: null }` |
+| PUT    | `/api/staff/:id/schedule` | Admin         | Create or update weekly hours, days off, and service assignments              |
 
 ### Appointments and availability
 
-| Method | Endpoint | Access | Description |
-| --- | --- | --- | --- |
-| GET | `/api/appointments/availability` | Public | Available slots; requires `serviceId`, `staffId`, and `date=YYYY-MM-DD` |
-| POST | `/api/appointments` | Customer | Book using `serviceId`, `staffId`, and `start`; creates a `PENDING` appointment and `APT-XXXXXX` reference |
-| GET | `/api/appointments` | Customer / Staff / Admin | List appointments within the caller's access scope |
-| GET | `/api/appointments/:id` | Customer / Staff / Admin | Retrieve appointment details within the caller's access scope |
-| PATCH | `/api/appointments/:id/confirm` | Staff / Admin | Confirm a pending booking |
-| PATCH | `/api/appointments/:id/reschedule` | Customer / Staff / Admin | Reschedule using `{ start }`, keeping the same practitioner |
-| PATCH | `/api/appointments/:id/cancel` | Customer / Staff / Admin | Cancel an appointment unless completed, cancelled, or no-show |
+| Method | Endpoint                           | Access                   | Description                                                                                                |
+| ------ | ---------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/appointments/availability`   | Public                   | Available slots; requires `serviceId`, `staffId`, and `date=YYYY-MM-DD`                                    |
+| POST   | `/api/appointments`                | Customer                 | Book using `serviceId`, `staffId`, and `start`; creates a `PENDING` appointment and `APT-XXXXXX` reference |
+| GET    | `/api/appointments`                | Customer / Staff / Admin | List appointments within the caller's access scope                                                         |
+| GET    | `/api/appointments/:id`            | Customer / Staff / Admin | Retrieve appointment details within the caller's access scope                                              |
+| PATCH  | `/api/appointments/:id/confirm`    | Staff / Admin            | Confirm a pending booking                                                                                  |
+| PATCH  | `/api/appointments/:id/reschedule` | Customer / Staff / Admin | Reschedule using `{ start }`, keeping the same practitioner                                                |
+| PATCH  | `/api/appointments/:id/cancel`     | Customer / Staff / Admin | Cancel an appointment unless completed, cancelled, or no-show                                              |
 
 The appointment list endpoint currently returns the complete accessible list. The dashboard table applies its date range, filters, sorting, and pagination in the browser.
 
 ### Queue
 
-| Method | Endpoint | Access | Description |
-| --- | --- | --- | --- |
-| POST | `/api/queue/check-in` | Staff / Admin | Check in a confirmed booking using `{ reference }` and assign a daily queue number |
-| GET | `/api/queue/today` | Staff / Admin | Today's uncompleted entries, including waiting and currently serving |
-| PATCH | `/api/queue/:id/call` | Staff / Admin | Call the specified checked-in queue entry; appointment becomes `IN_SERVICE` |
-| PATCH | `/api/queue/:id/complete` | Staff / Admin | Complete the specified in-service entry; appointment becomes `COMPLETED` |
+| Method | Endpoint                  | Access        | Description                                                                        |
+| ------ | ------------------------- | ------------- | ---------------------------------------------------------------------------------- |
+| POST   | `/api/queue/check-in`     | Staff / Admin | Check in a confirmed booking using `{ reference }` and assign a daily queue number |
+| GET    | `/api/queue/today`        | Staff / Admin | Today's uncompleted entries, including waiting and currently serving               |
+| PATCH  | `/api/queue/:id/call`     | Staff / Admin | Call the specified checked-in queue entry; appointment becomes `IN_SERVICE`        |
+| PATCH  | `/api/queue/:id/complete` | Staff / Admin | Complete the specified in-service entry; appointment becomes `COMPLETED`           |
 
 The call endpoint acts on the supplied queue entry ID; it does not automatically select the next patient.
 
 ### Dashboard and health
 
-| Method | Endpoint | Access | Description |
-| --- | --- | --- | --- |
-| GET | `/api/dashboard/stats` | Admin | Metrics and daily chart; accepts `startDate` and `endDate` in `YYYY-MM-DD` format, defaulting to the last seven days when both are omitted |
-| GET | `/api/health` | Public | API health response |
+| Method | Endpoint               | Access | Description                                                                                                                                |
+| ------ | ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/dashboard/stats` | Admin  | Metrics and daily chart; accepts `startDate` and `endDate` in `YYYY-MM-DD` format, defaulting to the last seven days when both are omitted |
+| GET    | `/api/health`          | Public | API health response                                                                                                                        |
 
 ## Local setup
 
@@ -222,15 +232,15 @@ The default frontend URL is `http://localhost:5173`; the API health endpoint is 
 
 ### 4. Create an administrator for local development
 
-Public registration creates customers only. Review and change the hardcoded account details in `backend/src/scripts/create-admin.ts` before running this development helper from the root:
+Public registration creates customers only. Review and change the hardcoded account details in `backend/src/infrastructure/scripts/create-admin.ts` before running this development helper from the root:
 
 ```bash
-npx tsx backend/src/scripts/create-admin.ts
+npx tsx backend/src/infrastructure/scripts/create-admin.ts
 ```
 
 The helper reads the root `.env` and does not log passwords. After signing in as an administrator, create services, staff accounts, and staff schedules before making customer bookings.
 
-## Build and regression checks
+## Build
 
 The root exposes these build scripts:
 
@@ -242,11 +252,3 @@ npm run build
 ```
 
 `npm run build` compiles shared contracts and the backend, then type-checks and bundles the frontend. The backend's `start` script runs `backend/dist/server.js` after a successful build.
-
-Run the regression checks from the repository root:
-
-```bash
-npm test
-```
-
-This builds the shared and backend workspaces, then runs Node's test runner. Tests cover booking conflicts and lock cleanup, timezone boundaries, concurrent appointment updates, authentication, queue numbering, and frontend state/effect regressions. Database, SMTP, and frontend network access are mocked; these checks do not require a running clinic database and do not replace browser or live-database integration tests.

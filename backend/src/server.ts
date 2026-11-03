@@ -13,18 +13,27 @@ import express, {
 import { createServer } from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
 
-import { connectDB } from './config/db';
-import authRoutes from './routes/auth.routes';
-import serviceRoutes from './routes/service.routes';
-import scheduleRoutes from './routes/schedule.routes';
-import userRoutes from './routes/user.routes';
-import appointmentRoutes from './routes/appointment.routes';
-import { ensureBookingLockIndexes } from './services/availability.service';
-import { initQueueSocket } from './sockets/queue.socket';
-import { queueRouter } from './routes/queue.routes';
-import dashboardRoutes from './routes/dashboard.routes';
-import { startNoShowCron } from './jobs/noshow.cron';
 
+import { connectDB } from './infrastructure/config/db';
+import { createDependencies } from './infrastructure/dependencies';
+import { createClinic } from './application/clinic';
+import { createControllers } from './presentation/controllers';
+import { createAuthMiddleware } from './presentation/middleware/auth.middleware';
+import { ensureBookingLockIndexes } from './infrastructure/locking/booking-lock';
+import { initQueueSocket, createQueuePublisher } from './infrastructure/sockets/queue.socket';
+import { startNoShowCron } from './infrastructure/jobs/noshow.cron';
+import { createAppointmentRoutes } from './presentation/routes/appointment.routes';
+import { createAuthRoutes } from './presentation/routes/auth.routes';
+import { createDashboardRoutes } from './presentation/routes/dashboard.routes';
+import { createQueueRoutes } from './presentation/routes/queue.routes';
+import { createScheduleRoutes } from './presentation/routes/schedule.routes';
+import { createServiceRoutes } from './presentation/routes/service.routes';
+import { createUserRoutes } from './presentation/routes/user.routes';
+
+
+const clinic = createClinic(createDependencies());
+const controllers = createControllers(clinic, createQueuePublisher);
+const auth = createAuthMiddleware(clinic.authentication);
 const app = express();
 const httpServer = createServer(app);
 
@@ -75,13 +84,13 @@ app.get(
   },
 );
 
-app.use('/api/auth', authRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/staff', scheduleRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/queue', queueRouter);
-app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/auth', createAuthRoutes(controllers.auth, auth));
+app.use('/api/services', createServiceRoutes(controllers.services, auth));
+app.use('/api/users', createUserRoutes(controllers.users, auth));
+app.use('/api/staff', createScheduleRoutes(controllers.schedules, auth));
+app.use('/api/appointments', createAppointmentRoutes(controllers.appointments, auth));
+app.use('/api/queue', createQueueRoutes(controllers.queue, auth));
+app.use('/api/dashboard', createDashboardRoutes(controllers.dashboard, auth));
 
 app.use(
   (_req: Request, res: Response): void => {
@@ -117,8 +126,8 @@ async function startServer(): Promise<void> {
   try {
     await connectDB();
     await ensureBookingLockIndexes();
-    startNoShowCron();
-    initQueueSocket(io);
+    startNoShowCron(clinic.runNoShowJob);
+    initQueueSocket(io, clinic.authentication.authenticateSocket);
 
     httpServer.listen(port, () => {
       console.log(`API server running on http://localhost:${port}`);

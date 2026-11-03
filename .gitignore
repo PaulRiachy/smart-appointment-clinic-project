@@ -28,3 +28,5 @@ Thumbs.db
 JWT-Tokens.txt 
 docs/
 tests/
+backend/test
+DDD.md
